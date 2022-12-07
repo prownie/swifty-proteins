@@ -1,11 +1,15 @@
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:swifty_proteins/utils/draw_helper.dart';
 import 'package:three_dart/three_dart.dart' as three;
 import 'package:flutter/material.dart';
+import '../utils/constants.dart';
+import '../model/atom.dart';
 
 class HelloWorld extends StatefulWidget {
-  const HelloWorld({super.key});
+  final List<Atom> atomList;
+  HelloWorld(this.atomList);
 
   @override
   State<HelloWorld> createState() => _HelloWorldState();
@@ -17,7 +21,7 @@ class _HelloWorldState extends State<HelloWorld> {
   late three.Scene scene;
   late three.PerspectiveCamera camera;
   late three.WebGLRenderTarget renderTarget;
-  late three.Group objects;
+  late three.Group Molecule;
   late double dpr = 1.0; //devicePixelRatio
   late double width;
   late double height;
@@ -99,49 +103,53 @@ class _HelloWorldState extends State<HelloWorld> {
 
   initImage() {
     scene = three.Scene();
+    Molecule = three.Group();
 
-    objects = three.Group();
-    geometry = three.BoxGeometry(1, 1, 1);
-    material = three.MeshBasicMaterial({"color": 0x000066});
-    mesh = three.Mesh(geometry, material);
-    // scene.add(mesh);
+    List<Atom> atomList = [];
+    // Atom atom1 = Atom(0, 0, 0, 'CU', [1, 2]);
+    // Atom atom2 = Atom(0, 0, -1.860, 'CL', [0]);
+    // Atom atom3 = Atom(0, 0, 1.860, 'CL', [0]);
+    // atomList.addAll([atom1, atom2, atom3]);
+    // Atom atom1 = Atom(1.922, 0.004, -0.565, 'C', [1, 7, 8, 9]);
+    // Atom atom2 = Atom(2.635, -0.003, 0.673, 'O', [0, 10]);
+    // Atom atom3 = Atom(-0.240, 1.198, -0.159, 'C', [3, 7, 11]);
+    // Atom atom4 = Atom(-1.600, 1.196, 0.092, 'C', [2, 4, 12]);
+    // Atom atom5 = Atom(-2.278, -0.002, 0.217, 'C', [3, 5, 13]);
+    // Atom atom6 = Atom(-1.597, -1.198, 0.090, 'C', [4, 6, 14]);
+    // Atom atom7 = Atom(-0.237, -1.196, -0.161, 'C', [5, 7, 15]);
+    // Atom atom8 = Atom(0.440, 0.002, -0.291, 'C', [0, 2, 6]);
+    // Atom atom9 = Atom(2.185, 0.897, -1.131, 'H', [0]);
+    // Atom atom10 = Atom(2.186, -0.883, -1.141, 'H', [0]);
+    // Atom atom11 = Atom(3.597, -0.002, 0.573, 'H', [1]);
+    // Atom atom12 = Atom(0.290, 2.134, -0.256, 'H', [2]);
+    // Atom atom13 = Atom(-2.132, 2.131, 0.192, 'H', [3]);
+    // Atom atom14 = Atom(-3.340, -0.003, 0.413, 'H', [4]);
+    // Atom atom15 = Atom(-2.126, -2.134, 0.188, 'H', [5]);
+    // Atom atom16 = Atom(0.295, -2.131, -0.260, 'H', [6]);
+    // atomList.addAll([
+    //   atom1,
+    //   atom2,
+    //   atom3,
+    //   atom4,
+    //   atom5,
+    //   atom6,
+    //   atom7,
+    //   atom8,
+    //   atom9,
+    //   atom10,
+    //   atom11,
+    //   atom12,
+    //   atom13,
+    //   atom14,
+    //   atom15,
+    //   atom16
+    // ]);
 
-    var sphere = three.SphereGeometry(5);
-
-    var couille = three.Mesh(sphere, material);
-    couille.position.set(0, 0, 0);
-    objects.add(couille);
-
-    var couille2 = three.Mesh(sphere, material);
-    couille2.position.set(10, 0, 0);
-    objects.add(couille2);
-
-    var curve = three.QuadraticBezierCurve(
-      three.Vector2(
-        -10.5,
-        0,
-      ),
-      three.Vector2(
-        0,
-        15,
-      ),
-      three.Vector2(
-        0,
-        0,
-      ),
-    );
-    var tube = three.CylinderGeometry(5, 5, 20);
-    var phallus = three.Mesh(tube, material);
-    phallus.position.set(5, -10, 0);
-    objects.add(phallus);
-    scene.add(objects);
-
-    var gland = three.Mesh(sphere, material);
-    gland.position.set(5, -20, 0);
-    objects.add(gland);
+    DrawHelper().drawMolecule(widget.atomList, Molecule);
+    scene.add(Molecule);
 
     camera.lookAt(scene.position);
-    camera.position.z = 50;
+    camera.position.z = 15;
     // mesh.rotation.x = 5;
     loaded = true;
     animate();
@@ -161,11 +169,11 @@ class _HelloWorldState extends State<HelloWorld> {
       return;
     }
 
-    objects.rotation.x += 0.02;
-    objects.rotation.y += 0.02;
+    Molecule.rotation.x += 0.01;
+    Molecule.rotation.y += 0.01;
 
     render();
-    Future.delayed(const Duration(milliseconds: 25), () {
+    Future.delayed(const Duration(milliseconds: 10), () {
       animate();
     });
   }

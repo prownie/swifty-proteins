@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../model/atom.dart';
 import 'package:three_dart/three_dart.dart' as three;
+import 'hello_world.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -12,7 +13,7 @@ class Homepage extends StatefulWidget {
 
 class _Homepage extends State<Homepage> {
   TextEditingController inputController = TextEditingController();
-
+  List<Atom>? atomList;
   @override
   void initState() {
     inputController.text = "CUL";
@@ -27,8 +28,11 @@ class _Homepage extends State<Homepage> {
         "https://files.rcsb.org/ligands/$first/$toSearch/${toSearch}_ideal.pdb"));
     final splitted = result.body.split('\n');
     print(result.body);
-    parse(splitted);
-
+    atomList = parse(splitted);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HelloWorld(atomList!)),
+    );
     //print(splitted[0]);
   }
 
