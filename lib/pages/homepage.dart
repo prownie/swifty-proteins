@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../model/atom.dart';
+import 'package:three_dart/three_dart.dart' as three;
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -25,6 +26,7 @@ class _Homepage extends State<Homepage> {
     var result = await http.get(Uri.parse(
         "https://files.rcsb.org/ligands/$first/$toSearch/${toSearch}_ideal.pdb"));
     final splitted = result.body.split('\n');
+    print(result.body);
     parse(splitted);
 
     //print(splitted[0]);
@@ -44,20 +46,35 @@ class _Homepage extends State<Homepage> {
         ]));
   }
 
-  void parse(List<String> splitted) {
-    for (int i = 0; i < splitted.length; i++) {
-      //atom
-      //get next double 33 == x
-      getNextDouble(splitted[i].substring(33));
-      //get next double 41 == y
-      getNextDouble(splitted[i].substring(41));//[49]);
-      //get next double 49 == z
-      getNextDouble(splitted[i].substring(49));//[76]);
-      //get next string 76 == name
+  List<Atom> parse(List<String> splitted) {
+    List<Atom> listAtom = [];
 
+    for (int i = 0; i < splitted.length; i++) {
+      //retire les espaces et met en tableau pour le traitement
+      String result = splitted[i].replaceAll(RegExp(' +'), ' ');
+      List<String> list = result.split(' ');
+
+      // remplit Atom
+      if (list[0] == "ATOM") {
+        listAtom.add(Atom(double.parse(list[6]), double.parse(list[7]),
+            double.parse(list[8]), list[11]));
+      } else if (list[0] == "CONECT") {
+        for (int i = 2; i < list.length; i++) {
+          listAtom[int.parse(list[1]) - 1].connect.add(int.parse(list[i]) - 1);
+        }
+      }
     }
+
+    //test
+    // for (int i = 0; i < listAtom.length; i++) {
+    //   print(listAtom[i].toString());
+    // }
+
+    return listAtom;
   }
   //connect
+  //- 1
+
   //}
   //final List<Atom> res = [];
   //return res;
