@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import '../model/atom.dart';
 import 'package:three_dart/three_dart.dart' as three;
 import 'hello_world.dart';
+import '../model/base_list.dart';
+import '../style/style.dart' as s;
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -23,7 +25,6 @@ class _Homepage extends State<Homepage> {
   void search() async {
     String toSearch = inputController.text;
     String first = toSearch[0];
-    //print(first);
     var result = await http.get(Uri.parse(
         "https://files.rcsb.org/ligands/$first/$toSearch/${toSearch}_ideal.pdb"));
     final splitted = result.body.split('\n');
@@ -33,21 +34,19 @@ class _Homepage extends State<Homepage> {
       context,
       MaterialPageRoute(builder: (context) => HelloWorld(atomList!)),
     );
-    //print(splitted[0]);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Atomizator'),
-        ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          TextField(
-            controller: inputController,
-          ),
-          OutlinedButton(onPressed: search, child: const Text("search")),
-        ]));
+  void searchList(String toSearch)async {
+String first = toSearch[0];
+    var result = await http.get(Uri.parse(
+        "https://files.rcsb.org/ligands/$first/$toSearch/${toSearch}_ideal.pdb"));
+    final splitted = result.body.split('\n');
+    print(result.body);
+    atomList = parse(splitted);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HelloWorld(atomList!)),
+    );
   }
 
   List<Atom> parse(List<String> splitted) {
@@ -69,31 +68,39 @@ class _Homepage extends State<Homepage> {
       }
     }
 
-    //test
-    // for (int i = 0; i < listAtom.length; i++) {
-    //   print(listAtom[i].toString());
-    // }
-
     return listAtom;
   }
-  //connect
-  //- 1
 
-  //}
-  //final List<Atom> res = [];
-  //return res;
-
-  double getNextDouble(String str) {
-    int i = 0;
-    while (str[i] == ' ') {
-      i++;
-    }
-    int y = i;
-    while (str[y] != ' ') {
-      y++;
-    }
-    String res = str.substring(i, y);
-    print("$i $y .    $res");
-    return 0.000;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Atomizator'),
+        ),
+        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          const SizedBox(
+            height: 30,
+          ),
+          TextField(
+            controller: inputController,
+          ),
+          OutlinedButton(onPressed: search, child: const Text("search")),
+          Expanded(
+              child: Scrollbar(
+                  child: ListView.builder(
+                      itemBuilder: (BuildContext context, int index) {
+                        return InkWell(
+                          onTap: () => searchList(baselist[index]),
+                          child: Container(
+                          margin: const EdgeInsets.only(
+                              top: 17, right: 30, left: 30),
+                          height: 50,
+                          decoration: s.Style.listBox ,
+                          //color: Colors.amber[baselist[index]],
+                          child: Center(child: Text(baselist[index])),
+                        ));
+                      },
+                      itemCount: baselist.length)))
+        ]));
   }
 }
