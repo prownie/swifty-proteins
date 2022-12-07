@@ -144,7 +144,7 @@ class _firstTestState extends State<firstTest> {
     var light = three.DirectionalLight(0xffffff, null);
     light.position.set(0.5, 0.5, 1);
     light.castShadow = true;
-    light.shadow!.camera!.zoom = 4; // tighter shadow map
+    light.shadow!.camera!.zoom = 10; // tighter shadow map
     scene.add(light);
 
     var geometryBackground = three.PlaneGeometry(100, 100);

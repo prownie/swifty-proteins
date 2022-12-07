@@ -21,7 +21,8 @@ class _HelloWorldState extends State<HelloWorld> {
   late three.Scene scene;
   late three.PerspectiveCamera camera;
   late three.WebGLRenderTarget renderTarget;
-  late three.Group Molecule;
+  late three.Group molecule;
+  late List<three.Mesh> moleculeLabels;
   late double dpr = 1.0; //devicePixelRatio
   late double width;
   late double height;
@@ -103,8 +104,8 @@ class _HelloWorldState extends State<HelloWorld> {
 
   initImage() {
     scene = three.Scene();
-    Molecule = three.Group();
-
+    molecule = three.Group();
+    moleculeLabels = [];
     List<Atom> atomList = [];
     // Atom atom1 = Atom(0, 0, 0, 'CU', [1, 2]);
     // Atom atom2 = Atom(0, 0, -1.860, 'CL', [0]);
@@ -144,12 +145,18 @@ class _HelloWorldState extends State<HelloWorld> {
     //   atom15,
     //   atom16
     // ]);
-
-    DrawHelper().drawMolecule(widget.atomList, Molecule);
-    scene.add(Molecule);
+    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    scene.add(ambientLight);
+    var light = three.DirectionalLight(0xffffff, null);
+    light.position.set(4, 4, 1);
+    light.castShadow = true;
+    light.shadow!.camera!.zoom = 1; // tighter shadow map
+    scene.add(light);
+    DrawHelper().drawMolecule(widget.atomList, molecule, moleculeLabels);
+    scene.add(molecule);
 
     camera.lookAt(scene.position);
-    camera.position.z = 15;
+    camera.position.z = 20;
     // mesh.rotation.x = 5;
     loaded = true;
     animate();
@@ -169,9 +176,11 @@ class _HelloWorldState extends State<HelloWorld> {
       return;
     }
 
-    Molecule.rotation.x += 0.01;
-    Molecule.rotation.y += 0.01;
-
+    molecule.rotation.x += 0.01;
+    molecule.rotation.y += 0.01;
+    moleculeLabels.forEach((label) {
+      label.lookAt(camera.position);
+    });
     render();
     Future.delayed(const Duration(milliseconds: 10), () {
       animate();
@@ -187,6 +196,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   dispose() {
     disposed = true;
+    super.dispose();
   }
 
   Widget _build(BuildContext context) {

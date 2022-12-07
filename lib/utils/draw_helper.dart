@@ -1,48 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:swifty_proteins/utils/constants.dart';
 import 'package:three_dart/three_dart.dart' as three;
+import 'package:three_dart_jsm/three_dart_jsm.dart' as three_jsm;
 import '../model/atom.dart';
 import 'dart:math' as math;
 
+loadFont() async {
+  var loader = new three_jsm.TYPRLoader(null);
+  var fontJson = await loader.loadAsync("assets/fonts/Yagora.ttf");
+  print("caca");
+  print(fontJson);
+  return three.TYPRFont(fontJson);
+}
+
 class DrawHelper {
-  late three.MeshBasicMaterial texture;
+  late three.MeshLambertMaterial texture;
   late three.SphereGeometry sphere;
   late three.Mesh atomToDraw;
   late List<Atom> atomList;
 
-  drawMolecule(List<Atom> list, three.Group moleculeDraw) {
+  drawMolecule(List<Atom> list, three.Group moleculeDraw,
+      List<three.Mesh> moleculeLabels) {
     atomList = list;
 
     for (var atom in atomList) {
       drawAtom(atom, moleculeDraw);
       for (var indexConnectedAtom in atom.connect) {
-        drawConnect(atom.coordinates, atomList[indexConnectedAtom].coordinates,
-            moleculeDraw);
+        drawDoubleConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
+        dispAtomName(atom, moleculeDraw, moleculeLabels);
       }
     }
   }
 
   drawAtom(Atom atom, three.Group moleculeDraw) {
     sphere = three.SphereGeometry(0.3);
-    texture = three.MeshBasicMaterial({"color": Constants.atomsCPK[atom.name]});
+    texture =
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atom.name]});
     atomToDraw = three.Mesh(sphere, texture);
     atomToDraw.position
         .set(atom.coordinates.x, atom.coordinates.y, atom.coordinates.z);
     moleculeDraw.add(atomToDraw);
   }
 
-  drawConnect(coordinatesX, coordinatesY, three.Group moleculeDraw) {
-    var direction = three.Vector3().subVectors(coordinatesY, coordinatesX);
-    var geometry = three.CylinderGeometry(0.1, 0.1, direction.length(), 6, 4);
-    geometry.applyMatrix4(
-        new three.Matrix4().makeTranslation(0, direction.length() / 2, 0));
-    geometry.applyMatrix4(
+  drawConnect(Atom atomX, Atom atomY, three.Group moleculeDraw) {
+    var direction =
+        three.Vector3().subVectors(atomY.coordinates, atomX.coordinates);
+    var bond = three.CylinderGeometry(0.1, 0.1, direction.length() / 2, 6, 4);
+    bond.applyMatrix4(
+        new three.Matrix4().makeTranslation(0, direction.length() / 4, 0));
+    bond.applyMatrix4(
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
 
-    var mesh =
-        three.Mesh(geometry, three.MeshBasicMaterial({"color": 0x0000ff}));
-    mesh.position.copy(coordinatesX);
-    mesh.lookAt(coordinatesY);
+    var mesh = three.Mesh(bond,
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
+    mesh.position.copy(atomX.coordinates);
+    mesh.lookAt(atomY.coordinates);
     moleculeDraw.add(mesh);
+  }
+
+  drawDoubleConnect(Atom atomX, Atom atomY, three.Group moleculeDraw) {
+    var direction =
+        three.Vector3().subVectors(atomY.coordinates, atomX.coordinates);
+    var firstBond =
+        three.CylinderGeometry(0.05, 0.05, direction.length() / 2, 6, 4);
+    firstBond.applyMatrix4(
+        new three.Matrix4().makeTranslation(0, direction.length() / 4, -0.06));
+    firstBond.applyMatrix4(
+        three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
+    var mesh = three.Mesh(firstBond,
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
+    mesh.position.copy(atomX.coordinates);
+    mesh.lookAt(atomY.coordinates);
+    moleculeDraw.add(mesh);
+
+    var secondBond =
+        three.CylinderGeometry(0.05, 0.05, direction.length() / 2, 6, 4);
+    secondBond.applyMatrix4(
+        new three.Matrix4().makeTranslation(0, direction.length() / 4, 0.06));
+    secondBond.applyMatrix4(
+        three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
+    mesh = three.Mesh(secondBond,
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
+    mesh.position.copy(atomX.coordinates);
+    mesh.lookAt(atomY.coordinates);
+    moleculeDraw.add(mesh);
+  }
+
+  dispAtomName(
+      Atom atom, three.Group moleculeDraw, List<three.Mesh> labelList) async {
+    var font = await loadFont();
+    var textGeo = three.TextGeometry(atom.name, {
+      "font": font,
+      "size": 0.5,
+      "height": 0.01,
+      "curveSegments": 1,
+      "bevelThickness": 0.2,
+      "bevelSize": 0.01,
+      "bevelEnabled": true
+    });
+    textGeo.computeBoundingBox();
+
+    var centerOffset =
+        -0.5 * (textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x);
+    var textMesh1 = three.Mesh(textGeo,
+        three.MeshPhongMaterial({"color": Constants.atomsCPK[atom.name]}));
+
+    textMesh1.position.x = atom.coordinates.x + 0.1;
+    textMesh1.position.y = atom.coordinates.y + 0.1 + centerOffset;
+    textMesh1.position.z = atom.coordinates.z + 0.1;
+
+    textMesh1.rotation.x = 0;
+    textMesh1.rotation.y = three.Math.PI * 2;
+    moleculeDraw.add(textMesh1);
+    labelList.add(textMesh1);
   }
 }
