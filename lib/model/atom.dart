@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:three_dart/three_dart.dart' as three;
 
 class Atom {
   final List<int> connect;
-  final double x;
-  final double y;
-  final double z;
+  late three.Vector3 coordinates;
   final String name;
 
-  Atom(this.x, this.y, this.z, this.name, this.connect);
+  Atom(double x, double y, double z, this.name, this.connect){
+    coordinates = three.Vector3(x, y, z);
+  }
 
   @override
   String toString() {
-    return "$name x:$x y:$y z:$z connect:$connect";
+    return "$name x:${coordinates.x} y:${coordinates.y} z:${coordinates.z} connect:$connect";
   }
 }

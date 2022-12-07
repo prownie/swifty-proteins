@@ -21,7 +21,7 @@ class _Homepage extends State<Homepage> {
   void search() async {
     String toSearch = inputController.text;
     String first = toSearch[0];
-    print(first);
+    //print(first);
     var result = await http.get(Uri.parse(
         "https://files.rcsb.org/ligands/$first/$toSearch/${toSearch}_ideal.pdb"));
     final splitted = result.body.split('\n');
@@ -44,18 +44,35 @@ class _Homepage extends State<Homepage> {
         ]));
   }
 
-  List<Atom> parse(List<String> splitted) {
-    List<Atom> res = [];
+  void parse(List<String> splitted) {
     for (int i = 0; i < splitted.length; i++) {
       //atom
-      if (splitted[i].startsWith("ATOM")) {
-        int y = 0;
-        for (; y < splitted[i].length; y++) {
-          print("$y $splitted[i][y]");
-        }
-      }
-      //connect
+      //get next double 33 == x
+      getNextDouble(splitted[i].substring(33));
+      //get next double 41 == y
+      getNextDouble(splitted[i].substring(41));//[49]);
+      //get next double 49 == z
+      getNextDouble(splitted[i].substring(49));//[76]);
+      //get next string 76 == name
+
     }
-    return res;
+  }
+  //connect
+  //}
+  //final List<Atom> res = [];
+  //return res;
+
+  double getNextDouble(String str) {
+    int i = 0;
+    while (str[i] == ' ') {
+      i++;
+    }
+    int y = i;
+    while (str[y] != ' ') {
+      y++;
+    }
+    String res = str.substring(i, y);
+    print("$i $y .    $res");
+    return 0.000;
   }
 }
