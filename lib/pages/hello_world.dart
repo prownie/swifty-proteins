@@ -145,13 +145,13 @@ class _HelloWorldState extends State<HelloWorld> {
     //   atom15,
     //   atom16
     // ]);
-    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    scene.add(ambientLight);
-    var light = three.DirectionalLight(0xffffff, null);
-    light.position.set(4, 4, 1);
-    light.castShadow = true;
-    light.shadow!.camera!.zoom = 1; // tighter shadow map
-    scene.add(light);
+    // var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    // scene.add(ambientLight);
+    // var light = three.DirectionalLight(0xffffff, null);
+    // light.position.set(4, 4, 1);
+    // light.castShadow = true;
+    // light.shadow!.camera!.zoom = 1; // tighter shadow map
+    // scene.add(light);
     DrawHelper().drawMolecule(widget.atomList, molecule, moleculeLabels);
     scene.add(molecule);
 
@@ -178,11 +178,11 @@ class _HelloWorldState extends State<HelloWorld> {
 
     molecule.rotation.x += 0.01;
     molecule.rotation.y += 0.01;
-    moleculeLabels.forEach((label) {
-      label.lookAt(camera.position);
-    });
+    // moleculeLabels.forEach((label) {
+    //   label.lookAt(camera.position);
+    // });
     render();
-    Future.delayed(const Duration(milliseconds: 10), () {
+    Future.delayed(const Duration(milliseconds: 25), () {
       animate();
     });
   }
