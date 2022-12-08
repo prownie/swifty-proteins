@@ -1,11 +1,14 @@
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:swifty_proteins/pages/homepage.dart';
 import 'package:swifty_proteins/utils/draw_helper.dart';
 import 'package:three_dart/three_dart.dart' as three;
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../model/atom.dart';
+import '../style/style.dart' as s;
+import '../model/base_list.dart';
 
 class HelloWorld extends StatefulWidget {
   final List<Atom> atomList;
@@ -219,6 +222,67 @@ class _HelloWorldState extends State<HelloWorld> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Hello world!'),
+        ),
+        drawer: Drawer(
+          // Add a ListView to the drawer. This ensures the user can scroll
+          // through the options in the drawer if there isn't enough vertical
+          // space to fit everything.
+          child: ListView(
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Homepage()),
+                  );
+                },
+                child: Container(
+                    color: Colors.red,
+                    height: 50,
+                    child: const Center(child: Text("return"))),
+              ),
+              TextField(
+                  onSubmitted: (value){
+                    //---------------------------------------//
+                    //
+                    //
+                    //    HERRRRRRRREEEEEEE utilise value 
+                    //
+                    //
+                    //---------------------------------------//
+                  },
+                  decoration: const InputDecoration(
+                    hintText: "search another one",
+                  ),
+              ),
+              SizedBox(
+                  height: 400,
+                  width: 20,
+                  child: Scrollbar(
+                      child: ListView.separated(
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                                onTap: () {
+                                  print(baselist[index]);
+                                  //---------------------------------------//
+                                  //
+                                  //
+                                  //    HERRRRRRRREEEEEEE au bout mon petit
+                                  //
+                                  //
+                                  //---------------------------------------//
+                                },
+                                child: SizedBox(
+                                  height: 30,
+                                  child: Center(child: Text(baselist[index])),
+                                ));
+                          },
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: baselist.length))),
+            ],
+          ),
         ),
         body: Builder(builder: (BuildContext context) {
           initSize(context);
