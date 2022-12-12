@@ -25,13 +25,16 @@ class _Homepage extends State<Homepage> {
     super.initState();
   }
 
-  Future renderCard(String str) async {
-    Molecule mol = await getMolecule(str);
-    setState(() {
-      molCard = mol;
+  void renderCard(String str) {
+    getMolecule(str).then((value) {
+      molCard = value;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => buildCard(context, molCard),
+      );
     });
-    //print(molCard.toString());
   }
+  //print(molCard.toString());
 
   void newMol() async {
     Molecule mol = await getMolecule(inputController.text);
@@ -82,12 +85,8 @@ class _Homepage extends State<Homepage> {
                                     IconButton(
                                       icon: const Icon(Icons.info),
                                       onPressed: () {
-                                        renderCard(baselist[index]); //TODO probleme show dialogue before card loaded
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              buildCard(context, molCard),
-                                        );
+                                        renderCard(baselist[
+                                            index]);
                                       },
                                     )
                                   ]),
