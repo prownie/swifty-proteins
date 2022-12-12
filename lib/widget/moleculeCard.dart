@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swifty_proteins/model/molecule.dart';
-import '';
 
 Widget buildCard(context, Molecule mol) {
-  //Molecule molecule = getMocule(mol);
-
   return AlertDialog(
     content: Column(
       children: [
@@ -20,7 +17,6 @@ Widget buildCard(context, Molecule mol) {
         onPressed: () {
           Navigator.of(context).pop();
         },
-        //textColor: Theme.of(context).primaryColor,
         child: const Text('Close'),
       ),
     ],

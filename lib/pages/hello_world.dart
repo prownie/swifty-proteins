@@ -11,9 +11,11 @@ import '../style/style.dart' as s;
 import '../model/base_list.dart';
 import '../model/molecule.dart';
 
+import '../widget/moleculeCard.dart';
+
 class HelloWorld extends StatefulWidget {
-  HelloWorld(this.molecule);
-  final Molecule molecule;
+  HelloWorld(this.moleculeClass);
+  final Molecule moleculeClass;
 
   @override
   State<HelloWorld> createState() => _HelloWorldState();
@@ -157,7 +159,7 @@ class _HelloWorldState extends State<HelloWorld> {
     // light.shadow!.camera!.zoom = 1; // tighter shadow map
     // scene.add(light);
     DrawHelper()
-        .drawMolecule(widget.molecule.atomList, molecule, moleculeLabels);
+        .drawMolecule(widget.moleculeClass.atomList, molecule, moleculeLabels);
     scene.add(molecule);
 
     camera.lookAt(scene.position);
@@ -223,7 +225,16 @@ class _HelloWorldState extends State<HelloWorld> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Hello world!'),
+          title: Text(widget.moleculeClass.name),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_rounded),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => buildCard(context, widget.moleculeClass)
+              ),
+            )
+          ],
         ),
         drawer: Drawer(
           child: ListView(
