@@ -113,22 +113,26 @@ class _Homepage extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+    double maxWidth = MediaQuery.of(context).size.width;
+    double maxHeight =
+        MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
+    print(maxHeight);
+    double minHeight =
+        AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
     return Scaffold(
-       // appBar: AppBar(
-       //   title: const Text('Atomizator'),
-       // ),
+        resizeToAvoidBottomInset: false,
+        // appBar: AppBar(
+        //   title: const Text('Atomizator'),
+        // ),
         body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-          const SizedBox(height: 20,),
           SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height -
-                20, //TODO height of safe area to fit screen
+            width: maxWidth,
+            height: maxHeight,
             child: Stack(
               children: <Widget>[
                 AnimatedPositioned(
-                  //width: selected ? 200.0 : 200.0,
-                  height: 40,//selected ? 300.0 : 50.0,
-                  top: (selected == 0) ? 150 : 0.0,
+                  height: maxHeight * 0.08,
+                  top: (selected == 0) ? maxHeight * 0.25 : maxHeight * 0.03,
                   left: 10,
                   right: 10,
                   duration: const Duration(seconds: 1),
@@ -136,17 +140,19 @@ class _Homepage extends State<Homepage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        selected = 1;
+                        selected = 0;
                       });
                     },
                     child: const Center(child: Text('Atomizator')),
-                    
                   ),
                 ),
                 AnimatedPositioned(
-                  //width: selected ? 200.0 : 200.0,
-                  height: (selected > 0) ? (selected == 1) ?  480 : 50 : 50,//selected ? 300.0 : 50.0,
-                  top: (selected > 0) ? 40 : 200.0,
+                  height: (selected > 0)
+                      ? (selected == 1)
+                          ? maxHeight * 0.78
+                          : maxHeight * 0.08
+                      : maxHeight * 0.08, 
+                  top: (selected > 0) ? maxHeight * 0.1 : maxHeight * 0.37,
                   left: 10,
                   right: 10,
                   duration: const Duration(seconds: 1),
@@ -159,20 +165,17 @@ class _Homepage extends State<Homepage> {
                     },
                     child: Container(
                       decoration: s.Style.listBox,
-                      //color: Colors.blue,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:const [
-                          Icon(Icons.search),
-                          Text('Custom search')
-                        ]),
+                      child: searchWidget(),
                     ),
                   ),
                 ),
                 AnimatedPositioned(
-                  //width: selected ? 200.0 : 200.0,
-                  height: (selected  == 2) ? 480 : 50,
-                  top: (selected  == 0) ? 260.0 : (selected == 1) ? 530: 100,
+                  height: (selected == 2) ? maxHeight * 0.78 : maxHeight * 0.08,
+                  top: (selected == 0)
+                      ? maxHeight * 0.47
+                      : (selected == 1)
+                          ? maxHeight * 0.90
+                          : maxHeight * 0.2,
                   left: 10,
                   right: 10,
                   duration: const Duration(seconds: 1),
@@ -180,56 +183,82 @@ class _Homepage extends State<Homepage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        //if (selected)
                         selected = 2;
                       });
                     },
                     child: Container(
                       decoration: s.Style.listBox,
-                      //color:Colors.red,
-                      //color: Colors.blue,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:const [
-                          Icon(Icons.menu),
-                          Text('Find in list')
-                        ]),
+                      child: listWidget(),
                     ),
                   ),
                 ),
               ],
             ),
           )
-
-          //const SizedBox(
-          //  height: 30,
-          //),
-
-          //TextField(
-          //  controller: inputController,
-          //),
-          //OutlinedButton(onPressed: loadMolSearch, child: const Text("search")),
-          //Expanded(
-          //    child: Scrollbar(
-          //        child: ListView.builder(
-          //            itemBuilder: (BuildContext context, int index) {
-          //              return InkWell(
-          //                  onTap: () => loadMol(baselist[index]),
-          //                  child: Container(
-          //                    margin: const EdgeInsets.only(
-          //                        top: 17, right: 30, left: 30),
-          //                    height: 50,
-          //                    decoration: s.Style.listBox,
-          //                    //color: Colors.amber[baselist[index]],
-          //                    child: Row(
-          //                        mainAxisAlignment: MainAxisAlignment.center,
-          //                        children: [
-          //                          Text(baselist[index]),
-          //                        ]),
-          //                  ));
-          //            },
-          //            itemCount: baselist.length)))
-          // ]
         ]));
+  }
+  
+  Widget listWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      //selected == 0 ? MainAxisAlignment.center : MainAxisAlignment.start,
+      children: [
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [Icon(Icons.menu), Text('Find in list')]),
+        selected == 2
+            ? Expanded(
+                child: Scrollbar(
+                    child: ListView.builder(
+                        itemBuilder: (BuildContext context, int index) {
+                          return InkWell(
+                              onTap: () => loadMol(baselist[index]),
+                              child: Container(
+                                margin: const EdgeInsets.only(
+                                    top: 17, right: 30, left: 30),
+                                height: 50,
+                                decoration: s.Style.listBox,
+                                //color: Colors.amber[baselist[index]],
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(baselist[index]),
+                                    ]),
+                              ));
+                        },
+                        itemCount: baselist.length)))
+            : const SizedBox(),
+      ],
+    );
+  }
+
+  Widget searchWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [Icon(Icons.search), Text('Custom search')]),
+        selected == 1
+            ? Expanded(
+                child: SingleChildScrollView(
+                    child: Container(
+                        margin: const EdgeInsets.all(15),
+                        child: Column(children: [
+                          TextField(
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(10.0)))),
+                            controller: inputController,
+                          ),
+                          OutlinedButton(
+                              onPressed: loadMolSearch,
+                              child: const Text("search")),
+                        ]))))
+            : const SizedBox(),
+      ],
+    );
   }
 }
