@@ -3,11 +3,17 @@ import 'package:http/http.dart' as http;
 import '../model/atom.dart';
 import '../model/molecule.dart';
 
-Future<Molecule> getMolecule(String code) async {
-  late Molecule ret = Molecule('', '', 0, '', '');
+Future<Molecule?> getMolecule(String code) async {
+  Molecule ret = Molecule('', '', 0, '', '');
   await initMol(code).then((value) {
-    ret = value;
+    if (value != null) {
+      ret = value;
+    }
   });
+  if (ret.name == '') {
+    print("empty donc 404");
+    return null;
+  }
   await getAtomList(code).then((value) {
     ret.atomList = value;
   });
@@ -15,11 +21,16 @@ Future<Molecule> getMolecule(String code) async {
   return ret;
 }
 
-Future<Molecule> initMol(String code) async {
+Future<Molecule?> initMol(String code) async {
   var result;
   result = await http
       .get(Uri.parse("https://data.rcsb.org/rest/v1/core/chemcomp/$code"));
+
   final parsed = jsonDecode(result.body);
+  if (parsed['status'] == 404) {
+    print(parsed['status']);
+    return null;
+  }
 
   Molecule mol = Molecule(
       parsed["chem_comp"]["name"],

@@ -10,6 +10,7 @@ import '../model/atom.dart';
 import '../style/style.dart' as s;
 import '../model/base_list.dart';
 import '../model/molecule.dart';
+import 'package:bottom_drawer/bottom_drawer.dart';
 
 import '../widget/moleculeCard.dart';
 
@@ -44,6 +45,9 @@ class _HelloWorldState extends State<HelloWorld> {
 
   dynamic sourceTexture;
   dynamic mesh;
+
+  //thomas
+  BottomDrawerController bottomController = BottomDrawerController();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
@@ -225,14 +229,15 @@ class _HelloWorldState extends State<HelloWorld> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.black,
           title: Text(widget.moleculeClass.name),
           actions: [
             IconButton(
               icon: const Icon(Icons.info_rounded),
               onPressed: () => showDialog(
-                context: context,
-                builder: (context) => buildCard(context, widget.moleculeClass)
-              ),
+                  context: context,
+                  builder: (context) =>
+                      buildCard(context, widget.moleculeClass)),
             )
           ],
         ),
@@ -242,8 +247,8 @@ class _HelloWorldState extends State<HelloWorld> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);// exit drawer
-                  Navigator.pop(context);// return to homepage
+                  Navigator.pop(context); // exit drawer
+                  Navigator.pop(context); // return to homepage
                 },
                 child: Container(
                     color: Colors.red,
@@ -293,9 +298,66 @@ class _HelloWorldState extends State<HelloWorld> {
         ),
         body: Builder(builder: (BuildContext context) {
           initSize(context);
-          return SingleChildScrollView(
-            child: _build(context),
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                child: _build(context),
+              ),
+              buildBottomDrawer(context)
+            ],
           );
         }));
+  }
+
+  Widget buildBottomDrawer(BuildContext context) {
+    return BottomDrawer(
+      //followTheBody: false,
+      /// your customized drawer header.
+      header: GestureDetector(
+        onTap: () => (bottomController.open()),
+        child: Container(
+            child: Row(
+              mainAxisAlignment:MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.arrow_upward, color: Colors.white,),
+                Text(
+                  "Info",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Icon(Icons.arrow_upward, color: Colors.white,)
+              ],
+            ),
+      )),
+
+      /// your customized drawer body.
+      body: GestureDetector(
+        onTap: () => (bottomController.close()),
+        child: Container(
+          width: 300,
+          child: Column(
+            children: [
+              SizedBox(height: 20,),
+              Text("formula: ${widget.moleculeClass.formula}\n"),
+              Text("name: ${widget.moleculeClass.name}\n"),
+              Text("type: ${widget.moleculeClass.type}\n"),
+              Text("letter code: ${widget.moleculeClass.letterCode}\n"),
+              //Text(mol.weight),
+            ],
+          ),
+        ),
+      ),
+
+      /// your customized drawer header height.
+      headerHeight: 35.0,
+
+      /// your customized drawer body height.
+      drawerHeight: 180.0,
+
+      /// drawer background color.
+      color: Colors.black,//.shade800,
+
+      /// drawer controller.
+      controller: bottomController,
+    );
   }
 }

@@ -6,6 +6,7 @@ import '../model/base_list.dart';
 import '../style/style.dart' as s;
 import '../utils/parse.dart';
 import '../widget/moleculeCard.dart';
+import '../widget/popUp404.dart';
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
 
@@ -21,6 +22,7 @@ class _Homepage extends State<Homepage> {
   List<Atom>? atomList;
   late Molecule molCard;
   late bool load;
+  final _formKey = GlobalKey<FormState>();
 
   //animated
   // 0 = default
@@ -30,7 +32,7 @@ class _Homepage extends State<Homepage> {
 
   @override
   void initState() {
-    inputController.text = "010";
+    inputController.text = "";
     load = false;
     molCard = Molecule('', '', 0, '', '');
     selected = 0;
@@ -66,10 +68,19 @@ class _Homepage extends State<Homepage> {
     );
     getMolecule(str).then((value) {
       Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HelloWorld(value)),
-      );
+      if (value == null) {
+        showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) {
+              return error404(context);
+            });
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HelloWorld(value)),
+        );
+      }
     });
   }
 
@@ -102,10 +113,14 @@ class _Homepage extends State<Homepage> {
     );
     getMolecule(str).then((value) {
       Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HelloWorld(value)),
-      );
+      if (value == null) {
+        print("go pop up ");
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HelloWorld(value)),
+        );
+      }
     });
   }
 
@@ -151,7 +166,7 @@ class _Homepage extends State<Homepage> {
                       ? (selected == 1)
                           ? maxHeight * 0.78
                           : maxHeight * 0.08
-                      : maxHeight * 0.08, 
+                      : maxHeight * 0.08,
                   top: (selected > 0) ? maxHeight * 0.1 : maxHeight * 0.37,
                   left: 10,
                   right: 10,
@@ -197,7 +212,7 @@ class _Homepage extends State<Homepage> {
           )
         ]));
   }
-  
+
   Widget listWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -244,19 +259,62 @@ class _Homepage extends State<Homepage> {
                 child: SingleChildScrollView(
                     child: Container(
                         margin: const EdgeInsets.all(15),
-                        child: Column(children: [
-                          TextField(
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(10.0)))),
-                            controller: inputController,
-                          ),
-                          OutlinedButton(
-                              onPressed: loadMolSearch,
-                              child: const Text("search")),
-                        ]))))
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Autocomplete<String>(
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
+                                  if (textEditingValue.text == '') {
+                                    return const Iterable<String>.empty();
+                                  }
+                                  return baselist.where((String option) {
+                                    return option.contains(
+                                        textEditingValue.text.toUpperCase());
+                                  });
+                                },
+                                fieldViewBuilder: (BuildContext context,
+                                    inputController,
+                                    FocusNode focusNode,
+                                    VoidCallback onFieldSubmitted) {
+                                  return Form(
+                                      key: _formKey,
+                                      child: TextFormField(
+                                        validator: (value) {
+                                          final validCharacters = RegExp(r'^[a-zA-Z0-9]+$'); // alphanum 
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please enter some text';
+                                          }else if (!validCharacters.hasMatch(inputController.text)) {
+                                            return "ligand code contain only alphanum character";
+                                          }
+                                          else if (inputController.text.length !=
+                                              3) {
+                                            return "ligand code contain exactly 3 character";
+                                          }
+                                          return null;
+                                        },
+                                        controller: inputController,
+                                        decoration: const InputDecoration(
+                                          hintText: "Type or select from list",
+                                          border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(15))),
+                                        ),
+                                        focusNode: focusNode,
+                                        onFieldSubmitted: (String value) {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            onFieldSubmitted();
+                                            loadMol(value);
+                                          }
+                                        },
+                                      ));
+                                },
+                                onSelected: (String selection) {
+                                  loadMol(selection);
+                                },
+                              )
+                            ]))))
             : const SizedBox(),
       ],
     );
