@@ -43,6 +43,7 @@ dependencies:
   http: ^0.13.5
   three_dart_jsm: ^0.0.9
   bottom_drawer: ^0.0.5
+  local_auth: ^2.1.2 
 
 dev_dependencies:
   flutter_test:

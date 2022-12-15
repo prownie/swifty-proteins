@@ -7,6 +7,7 @@ import '../style/style.dart' as s;
 import '../utils/parse.dart';
 import '../widget/moleculeCard.dart';
 import '../widget/popUp404.dart';
+import '../widget/auth.dart';
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
 
@@ -17,12 +18,13 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _Homepage();
 }
 
-class _Homepage extends State<Homepage> {
+class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   TextEditingController inputController = TextEditingController();
   List<Atom>? atomList;
   late Molecule molCard;
   late bool load;
   final _formKey = GlobalKey<FormState>();
+  final List<AppLifecycleState> _stateHistoryList = <AppLifecycleState>[];
 
   //animated
   // 0 = default
@@ -36,8 +38,31 @@ class _Homepage extends State<Homepage> {
     load = false;
     molCard = Molecule('', '', 0, '', '');
     selected = 0;
+
+    WidgetsBinding.instance.addObserver(this);
+    if (WidgetsBinding.instance.lifecycleState != null) {
+      _stateHistoryList.add(WidgetsBinding.instance.lifecycleState!);
+    }
     //selected = false;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _stateHistoryList.add(state);
+      print(state);
+      if (_stateHistoryList[_stateHistoryList.length - 1] ==
+          AppLifecycleState.resumed) {
+        showLogginDialog(context);
+      }
+    });
   }
 
   void loadMol(String str) {
@@ -281,13 +306,15 @@ class _Homepage extends State<Homepage> {
                                       key: _formKey,
                                       child: TextFormField(
                                         validator: (value) {
-                                          final validCharacters = RegExp(r'^[a-zA-Z0-9]+$'); // alphanum 
+                                          final validCharacters = RegExp(
+                                              r'^[a-zA-Z0-9]+$'); // alphanum
                                           if (value == null || value.isEmpty) {
                                             return 'Please enter some text';
-                                          }else if (!validCharacters.hasMatch(inputController.text)) {
+                                          } else if (!validCharacters
+                                              .hasMatch(inputController.text)) {
                                             return "ligand code contain only alphanum character";
-                                          }
-                                          else if (inputController.text.length !=
+                                          } else if (inputController
+                                                  .text.length !=
                                               3) {
                                             return "ligand code contain exactly 3 character";
                                           }
