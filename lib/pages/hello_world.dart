@@ -34,6 +34,8 @@ class _HelloWorldState extends State<HelloWorld> {
   late double width;
   late double height;
   late three.Vector2 pointer = three.Vector2();
+  late three.Vector2 pointerDown = three.Vector2();
+  late three.Vector2 pointerMove = three.Vector2();
 
   Size? screenSize;
 
@@ -43,16 +45,19 @@ class _HelloWorldState extends State<HelloWorld> {
 
   late bool loaded = false;
   late bool disposed = false;
-
+  String? labelMolecule;
   dynamic sourceTexture;
   dynamic mesh;
-
+  dynamic targetRotationX = 0.0;
+  dynamic targetRotationY = 0.0;
+  dynamic targetRotationOnPointerDownX = 0.0;
+  dynamic targetRotationOnPointerDownY = 0.0;
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height;
+    height = screenSize!.height - 76;
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -82,8 +87,7 @@ class _HelloWorldState extends State<HelloWorld> {
     final mqd = MediaQuery.of(context);
     screenSize = mqd.size;
     dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
+    if (renderer == null) initPlatformState();
   }
 
   initRenderer() {
@@ -141,6 +145,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   animate() {
     if (!mounted || disposed) {
+      print("animation stopped");
       return;
     }
 
@@ -148,11 +153,10 @@ class _HelloWorldState extends State<HelloWorld> {
       return;
     }
 
-    molecule.rotation.x += 0.005;
-    molecule.rotation.y += 0.005;
-    // moleculeLabels.forEach((label) {
-    // if (atomLabel != null) atomLabel!.lookAt(camera.position);
-    // });
+    molecule.rotation.y += (targetRotationX - molecule.rotation.y) * 0.05;
+    molecule.rotation.x += (targetRotationY - molecule.rotation.x) * 0.05;
+    // molecule.rotation.x += 0.01;
+    // molecule.rotation.y += 0.01;
     render();
     Future.delayed(const Duration(milliseconds: 20), () {
       animate();
@@ -171,7 +175,22 @@ class _HelloWorldState extends State<HelloWorld> {
     super.dispose();
   }
 
+  _rotateMolecule(PointerEvent details) async {
+    pointerMove.x = details.position.dx - width / 2;
+    pointerMove.y = details.position.dy - height / 2;
+    targetRotationX =
+        targetRotationOnPointerDownX + (pointerMove.x - pointerDown.x) * 0.02;
+    targetRotationY =
+        targetRotationOnPointerDownY + (pointerMove.y - pointerDown.y) * 0.02;
+  }
+
   _getLocations(PointerEvent details) async {
+    print("getLocationCalled");
+    pointerDown.x = details.position.dx - width / 2;
+    pointerDown.y = details.position.dy - height / 2;
+    targetRotationOnPointerDownX = targetRotationX;
+    targetRotationOnPointerDownY = targetRotationY;
+
     pointer.x = (details.position.dx / width) * 2 - 1;
     pointer.y = -((details.position.dy - 80) / height) * 2 + 1;
     print('width:${width}, height:${height}');
@@ -191,13 +210,10 @@ class _HelloWorldState extends State<HelloWorld> {
           atomLabel!.dispose();
           atomLabel = null;
         }
-        //print('hello${intersects[i].object.material.color.getHex()}');
-        atomLabel = await DrawHelper().dispAtomName(
-            intersects[i].object.position.x,
-            intersects[i].object.position.y,
-            intersects[i].object.position.z,
-            getAtomNameFromColor(intersects[i].object.material.color.getHex()),
-            molecule);
+        setState(() {
+          labelMolecule = getAtomNameFromColor(
+              intersects[i].object.material.color.getHex());
+        });
       }
     }
   }
@@ -211,6 +227,7 @@ class _HelloWorldState extends State<HelloWorld> {
           builder: (BuildContext context) {
             print(three3dRender);
             return Listener(
+                onPointerMove: _rotateMolecule,
                 onPointerDown: _getLocations,
                 child: three3dRender.isInitialized
                     ? Texture(textureId: three3dRender.textureId!)
@@ -294,7 +311,7 @@ class _HelloWorldState extends State<HelloWorld> {
           initSize(context);
           return Stack(
             children: [
-              SingleChildScrollView(
+              Container(
                 child: _build(context),
               ),
               buildBottomDrawer(context)
@@ -312,19 +329,22 @@ class _HelloWorldState extends State<HelloWorld> {
           child: Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.arrow_upward,
                   color: Colors.white,
                 ),
-                Text(
+                const Text(
                   "Info",
                   style: TextStyle(color: Colors.white),
                 ),
-                Icon(
+                const Icon(
                   Icons.arrow_upward,
                   color: Colors.white,
-                )
+                ),
+                labelMolecule != null
+                    ? Text(labelMolecule!)
+                    : SizedBox.shrink(),
               ],
             ),
           )),
