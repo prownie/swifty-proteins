@@ -1,15 +1,22 @@
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:swifty_proteins/pages/homepage.dart';
 import 'package:swifty_proteins/utils/draw_helper.dart';
 import 'package:three_dart/three_dart.dart' as three;
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../model/atom.dart';
+import '../style/style.dart' as s;
+import '../model/base_list.dart';
+import '../model/molecule.dart';
+import 'package:bottom_drawer/bottom_drawer.dart';
+
+import '../widget/moleculeCard.dart';
 
 class HelloWorld extends StatefulWidget {
-  final List<Atom> atomList;
-  HelloWorld(this.atomList);
+  HelloWorld(this.moleculeClass);
+  final Molecule moleculeClass;
 
   @override
   State<HelloWorld> createState() => _HelloWorldState();
@@ -39,6 +46,9 @@ class _HelloWorldState extends State<HelloWorld> {
 
   dynamic sourceTexture;
   dynamic mesh;
+
+  //thomas
+  BottomDrawerController bottomController = BottomDrawerController();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
@@ -114,7 +124,7 @@ class _HelloWorldState extends State<HelloWorld> {
     // light.castShadow = true;
     // light.shadow!.camera!.zoom = 1; // tighter shadow map
     // scene.add(light);
-    DrawHelper().drawMolecule(widget.atomList, molecule);
+    DrawHelper().drawMolecule(widget.moleculeClass.atomList, molecule);
     scene.add(molecule);
 
     camera.lookAt(scene.position);
@@ -213,13 +223,143 @@ class _HelloWorldState extends State<HelloWorld> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Hello world!'),
+          backgroundColor: Colors.black,
+          title: Text(widget.moleculeClass.name),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_rounded),
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) =>
+                      buildCard(context, widget.moleculeClass)),
+            )
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // exit drawer
+                  Navigator.pop(context); // return to homepage
+                },
+                child: Container(
+                    color: Colors.red,
+                    height: 50,
+                    child: const Center(child: Text("return"))),
+              ),
+              TextField(
+                onSubmitted: (value) {
+                  //---------------------------------------//
+                  //
+                  //
+                  //    HERRRRRRRREEEEEEE utilise value
+                  //
+                  //
+                  //---------------------------------------//
+                },
+                decoration: const InputDecoration(
+                  hintText: "search another one",
+                ),
+              ),
+              SizedBox(
+                  height: 400,
+                  width: 20,
+                  child: Scrollbar(
+                      child: ListView.separated(
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                                onTap: () {
+                                  print(baselist[index]);
+                                  //---------------------------------------//
+                                  //
+                                  //
+                                  //    HERRRRRRRREEEEEEE au bout mon petit
+                                  //
+                                  //
+                                  //---------------------------------------//
+                                },
+                                child: SizedBox(
+                                  height: 30,
+                                  child: Center(child: Text(baselist[index])),
+                                ));
+                          },
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: baselist.length))),
+            ],
+          ),
         ),
         body: Builder(builder: (BuildContext context) {
           initSize(context);
-          return SingleChildScrollView(
-            child: _build(context),
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                child: _build(context),
+              ),
+              buildBottomDrawer(context)
+            ],
           );
         }));
+  }
+
+  Widget buildBottomDrawer(BuildContext context) {
+    return BottomDrawer(
+      //followTheBody: false,
+      /// your customized drawer header.
+      header: GestureDetector(
+          onTap: () => (bottomController.open()),
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                ),
+                Text(
+                  "Info",
+                  style: TextStyle(color: Colors.white),
+                ),
+                Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                )
+              ],
+            ),
+          )),
+
+      /// your customized drawer body.
+      body: GestureDetector(
+        onTap: () => (bottomController.close()),
+        child: Container(
+          width: 300,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 20,
+              ),
+              Text("formula: ${widget.moleculeClass.formula}\n"),
+              Text("name: ${widget.moleculeClass.name}\n"),
+              Text("type: ${widget.moleculeClass.type}\n"),
+              Text("letter code: ${widget.moleculeClass.letterCode}\n"),
+              //Text(mol.weight),
+            ],
+          ),
+        ),
+      ),
+
+      /// your customized drawer header height.
+      headerHeight: 35.0,
+
+      /// your customized drawer body height.
+      drawerHeight: 180.0,
+
+      /// drawer background color.
+      color: Colors.black, //.shade800,
+
+      /// drawer controller.
+      controller: bottomController,
+    );
   }
 }

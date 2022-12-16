@@ -42,6 +42,7 @@ dependencies:
   flutter_gl: ^0.0.21
   http: ^0.13.5
   three_dart_jsm: ^0.0.9
+  bottom_drawer: ^0.0.5
 
 dev_dependencies:
   flutter_test:
