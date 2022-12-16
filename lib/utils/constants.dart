@@ -113,3 +113,14 @@ class Constants {
     'MT': 0xEB0026
   };
 }
+
+String getAtomNameFromColor(int color) {
+  String name = 'Not found';
+  Constants.atomsCPK.forEach((key, value) {
+    if (value == color) {
+      name = key;
+      return;
+    }
+  });
+  return name;
+}

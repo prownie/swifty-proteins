@@ -19,8 +19,7 @@ class DrawHelper {
   late three.Mesh atomToDraw;
   late List<Atom> atomList;
 
-  drawMolecule(List<Atom> list, three.Group moleculeDraw,
-      List<three.Mesh> moleculeLabels) {
+  drawMolecule(List<Atom> list, three.Group moleculeDraw) {
     atomList = list;
 
     for (var atom in atomList) {
@@ -85,10 +84,11 @@ class DrawHelper {
     moleculeDraw.add(mesh);
   }
 
-  dispAtomName(
-      Atom atom, three.Group moleculeDraw, List<three.Mesh> labelList) async {
+  Future<three.Mesh> dispAtomName(double x, double y, double z, String atomName,
+      three.Group moleculeDraw) async {
+    print('in dispatomname, name=' + atomName);
     var font = await loadFont();
-    var textGeo = three.TextGeometry(atom.name, {
+    var textGeo = three.TextGeometry(atomName, {
       "font": font,
       "size": 0.5,
       "height": 0.01,
@@ -101,16 +101,18 @@ class DrawHelper {
 
     var centerOffset =
         -0.5 * (textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x);
-    var textMesh1 = three.Mesh(textGeo,
-        three.MeshPhongMaterial({"color": Constants.atomsCPK[atom.name]}));
+    // var textMesh1 = three.Mesh(textGeo,
+    //     three.MeshBasicMaterial({"color": Constants.atomsCPK[atomName]}));
+    var textMesh1 =
+        three.Mesh(textGeo, three.MeshBasicMaterial({"color": 0xFF0000}));
 
-    textMesh1.position.x = atom.coordinates.x;
-    textMesh1.position.y = atom.coordinates.y + centerOffset;
-    textMesh1.position.z = atom.coordinates.z;
+    textMesh1.position.x = x;
+    textMesh1.position.y = y + centerOffset;
+    textMesh1.position.z = z;
 
     textMesh1.rotation.x = 0;
     textMesh1.rotation.y = three.Math.PI * 2;
     moleculeDraw.add(textMesh1);
-    labelList.add(textMesh1);
+    return textMesh1;
   }
 }
