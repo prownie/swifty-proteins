@@ -148,13 +148,13 @@ class _HelloWorldState extends State<HelloWorld> {
       return;
     }
 
-    molecule.rotation.x += 0.01;
-    molecule.rotation.y += 0.01;
+    molecule.rotation.x += 0.005;
+    molecule.rotation.y += 0.005;
     // moleculeLabels.forEach((label) {
-    if (atomLabel != null) atomLabel!.lookAt(camera.position);
+    // if (atomLabel != null) atomLabel!.lookAt(camera.position);
     // });
     render();
-    Future.delayed(const Duration(milliseconds: 25), () {
+    Future.delayed(const Duration(milliseconds: 20), () {
       animate();
     });
   }
