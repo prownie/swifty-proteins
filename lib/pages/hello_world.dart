@@ -40,7 +40,7 @@ class _HelloWorldState extends State<HelloWorld> {
   Size? screenSize;
 
   late three.BoxGeometry geometry;
-  late three.MeshBasicMaterial material;
+  late three.MeshLambertMaterial material;
   late three.Mesh cube;
 
   late bool loaded = false;
@@ -121,13 +121,13 @@ class _HelloWorldState extends State<HelloWorld> {
     scene = three.Scene();
     molecule = three.Group();
     List<Atom> atomList = [];
-    // var ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    // scene.add(ambientLight);
-    // var light = three.DirectionalLight(0xffffff, null);
-    // light.position.set(4, 4, 1);
-    // light.castShadow = true;
-    // light.shadow!.camera!.zoom = 1; // tighter shadow map
-    // scene.add(light);
+    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    scene.add(ambientLight);
+    var light = three.DirectionalLight(0xffffff, null);
+    light.position.set(4, 4, 1);
+    light.castShadow = true;
+    light.shadow!.camera!.zoom = 1; // tighter shadow map
+    scene.add(light);
     DrawHelper().drawMolecule(widget.moleculeClass.atomList, molecule);
     scene.add(molecule);
 
@@ -158,7 +158,7 @@ class _HelloWorldState extends State<HelloWorld> {
     // molecule.rotation.x += 0.01;
     // molecule.rotation.y += 0.01;
     render();
-    Future.delayed(const Duration(milliseconds: 20), () {
+    Future.delayed(const Duration(milliseconds: 16), () {
       animate();
     });
   }
