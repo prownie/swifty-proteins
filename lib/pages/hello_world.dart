@@ -29,29 +29,35 @@ class _HelloWorldState extends State<HelloWorld> {
   late three.PerspectiveCamera camera;
   late three.WebGLRenderTarget renderTarget;
   late three.Group molecule;
-  late List<three.Mesh> moleculeLabels;
+  three.Mesh? atomLabel;
   late double dpr = 1.0; //devicePixelRatio
   late double width;
   late double height;
+  late three.Vector2 pointer = three.Vector2();
+  late three.Vector2 pointerDown = three.Vector2();
+  late three.Vector2 pointerMove = three.Vector2();
 
   Size? screenSize;
 
   late three.BoxGeometry geometry;
-  late three.MeshBasicMaterial material;
+  late three.MeshLambertMaterial material;
   late three.Mesh cube;
 
   late bool loaded = false;
   late bool disposed = false;
-
+  String? labelMolecule;
   dynamic sourceTexture;
   dynamic mesh;
-
+  dynamic targetRotationX = 0.0;
+  dynamic targetRotationY = 0.0;
+  dynamic targetRotationOnPointerDownX = 0.0;
+  dynamic targetRotationOnPointerDownY = 0.0;
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height;
+    height = screenSize!.height - 76;
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -81,8 +87,7 @@ class _HelloWorldState extends State<HelloWorld> {
     final mqd = MediaQuery.of(context);
     screenSize = mqd.size;
     dpr = mqd.devicePixelRatio;
-
-    initPlatformState();
+    if (renderer == null) initPlatformState();
   }
 
   initRenderer() {
@@ -115,55 +120,15 @@ class _HelloWorldState extends State<HelloWorld> {
   initImage() {
     scene = three.Scene();
     molecule = three.Group();
-    moleculeLabels = [];
     List<Atom> atomList = [];
-    // Atom atom1 = Atom(0, 0, 0, 'CU', [1, 2]);
-    // Atom atom2 = Atom(0, 0, -1.860, 'CL', [0]);
-    // Atom atom3 = Atom(0, 0, 1.860, 'CL', [0]);
-    // atomList.addAll([atom1, atom2, atom3]);
-    // Atom atom1 = Atom(1.922, 0.004, -0.565, 'C', [1, 7, 8, 9]);
-    // Atom atom2 = Atom(2.635, -0.003, 0.673, 'O', [0, 10]);
-    // Atom atom3 = Atom(-0.240, 1.198, -0.159, 'C', [3, 7, 11]);
-    // Atom atom4 = Atom(-1.600, 1.196, 0.092, 'C', [2, 4, 12]);
-    // Atom atom5 = Atom(-2.278, -0.002, 0.217, 'C', [3, 5, 13]);
-    // Atom atom6 = Atom(-1.597, -1.198, 0.090, 'C', [4, 6, 14]);
-    // Atom atom7 = Atom(-0.237, -1.196, -0.161, 'C', [5, 7, 15]);
-    // Atom atom8 = Atom(0.440, 0.002, -0.291, 'C', [0, 2, 6]);
-    // Atom atom9 = Atom(2.185, 0.897, -1.131, 'H', [0]);
-    // Atom atom10 = Atom(2.186, -0.883, -1.141, 'H', [0]);
-    // Atom atom11 = Atom(3.597, -0.002, 0.573, 'H', [1]);
-    // Atom atom12 = Atom(0.290, 2.134, -0.256, 'H', [2]);
-    // Atom atom13 = Atom(-2.132, 2.131, 0.192, 'H', [3]);
-    // Atom atom14 = Atom(-3.340, -0.003, 0.413, 'H', [4]);
-    // Atom atom15 = Atom(-2.126, -2.134, 0.188, 'H', [5]);
-    // Atom atom16 = Atom(0.295, -2.131, -0.260, 'H', [6]);
-    // atomList.addAll([
-    //   atom1,
-    //   atom2,
-    //   atom3,
-    //   atom4,
-    //   atom5,
-    //   atom6,
-    //   atom7,
-    //   atom8,
-    //   atom9,
-    //   atom10,
-    //   atom11,
-    //   atom12,
-    //   atom13,
-    //   atom14,
-    //   atom15,
-    //   atom16
-    // ]);
-    // var ambientLight = three.AmbientLight(0xcccccc, 0.4);
-    // scene.add(ambientLight);
-    // var light = three.DirectionalLight(0xffffff, null);
-    // light.position.set(4, 4, 1);
-    // light.castShadow = true;
-    // light.shadow!.camera!.zoom = 1; // tighter shadow map
-    // scene.add(light);
-    DrawHelper()
-        .drawMolecule(widget.moleculeClass.atomList, molecule, moleculeLabels);
+    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    scene.add(ambientLight);
+    var light = three.DirectionalLight(0xffffff, null);
+    light.position.set(4, 4, 1);
+    light.castShadow = true;
+    light.shadow!.camera!.zoom = 1; // tighter shadow map
+    scene.add(light);
+    DrawHelper().drawMolecule(widget.moleculeClass.atomList, molecule);
     scene.add(molecule);
 
     camera.lookAt(scene.position);
@@ -180,6 +145,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   animate() {
     if (!mounted || disposed) {
+      print("animation stopped");
       return;
     }
 
@@ -187,13 +153,12 @@ class _HelloWorldState extends State<HelloWorld> {
       return;
     }
 
-    molecule.rotation.x += 0.01;
-    molecule.rotation.y += 0.01;
-    // moleculeLabels.forEach((label) {
-    //   label.lookAt(camera.position);
-    // });
+    molecule.rotation.y += (targetRotationX - molecule.rotation.y) * 0.05;
+    molecule.rotation.x += (targetRotationY - molecule.rotation.x) * 0.05;
+    // molecule.rotation.x += 0.01;
+    // molecule.rotation.y += 0.01;
     render();
-    Future.delayed(const Duration(milliseconds: 25), () {
+    Future.delayed(const Duration(milliseconds: 16), () {
       animate();
     });
   }
@@ -210,6 +175,49 @@ class _HelloWorldState extends State<HelloWorld> {
     super.dispose();
   }
 
+  _rotateMolecule(PointerEvent details) async {
+    pointerMove.x = details.position.dx - width / 2;
+    pointerMove.y = details.position.dy - height / 2;
+    targetRotationX =
+        targetRotationOnPointerDownX + (pointerMove.x - pointerDown.x) * 0.02;
+    targetRotationY =
+        targetRotationOnPointerDownY + (pointerMove.y - pointerDown.y) * 0.02;
+  }
+
+  _getLocations(PointerEvent details) async {
+    print("getLocationCalled");
+    pointerDown.x = details.position.dx - width / 2;
+    pointerDown.y = details.position.dy - height / 2;
+    targetRotationOnPointerDownX = targetRotationX;
+    targetRotationOnPointerDownY = targetRotationY;
+
+    pointer.x = (details.position.dx / width) * 2 - 1;
+    pointer.y = -((details.position.dy - 80) / height) * 2 + 1;
+    print('width:${width}, height:${height}');
+    print('x:${details.position.dx}, y: ${details.position.dy}');
+    print('pointerx:${pointer.x}, y: ${pointer.y}');
+    var raycaster = three.Raycaster();
+    raycaster.setFromCamera(pointer, camera);
+
+    // calculate objects intersecting the picking ray
+    var intersects = raycaster.intersectObjects(scene.children, true);
+
+    print('interscetlength: ${intersects.length}');
+    for (var i = 0; i < intersects.length; i++) {
+      if (intersects[i].object.geometry!.type == 'SphereGeometry') {
+        if (atomLabel != null) {
+          molecule.remove(atomLabel!);
+          atomLabel!.dispose();
+          atomLabel = null;
+        }
+        setState(() {
+          labelMolecule = getAtomNameFromColor(
+              intersects[i].object.material.color.getHex());
+        });
+      }
+    }
+  }
+
   Widget _build(BuildContext context) {
     return Container(
         width: width,
@@ -218,9 +226,12 @@ class _HelloWorldState extends State<HelloWorld> {
         child: Builder(
           builder: (BuildContext context) {
             print(three3dRender);
-            return three3dRender.isInitialized
-                ? Texture(textureId: three3dRender.textureId!)
-                : Container(color: Colors.yellow);
+            return Listener(
+                onPointerMove: _rotateMolecule,
+                onPointerDown: _getLocations,
+                child: three3dRender.isInitialized
+                    ? Texture(textureId: three3dRender.textureId!)
+                    : Container(color: Colors.yellow));
           },
         ));
   }
@@ -300,7 +311,7 @@ class _HelloWorldState extends State<HelloWorld> {
           initSize(context);
           return Stack(
             children: [
-              SingleChildScrollView(
+              Container(
                 child: _build(context),
               ),
               buildBottomDrawer(context)
@@ -314,20 +325,29 @@ class _HelloWorldState extends State<HelloWorld> {
       //followTheBody: false,
       /// your customized drawer header.
       header: GestureDetector(
-        onTap: () => (bottomController.open()),
-        child: Container(
+          onTap: () => (bottomController.open()),
+          child: Container(
             child: Row(
-              mainAxisAlignment:MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.arrow_upward, color: Colors.white,),
-                Text(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                ),
+                const Text(
                   "Info",
                   style: TextStyle(color: Colors.white),
                 ),
-                Icon(Icons.arrow_upward, color: Colors.white,)
+                const Icon(
+                  Icons.arrow_upward,
+                  color: Colors.white,
+                ),
+                labelMolecule != null
+                    ? Text(labelMolecule!)
+                    : SizedBox.shrink(),
               ],
             ),
-      )),
+          )),
 
       /// your customized drawer body.
       body: GestureDetector(
@@ -336,7 +356,9 @@ class _HelloWorldState extends State<HelloWorld> {
           width: 300,
           child: Column(
             children: [
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               Text("formula: ${widget.moleculeClass.formula}\n"),
               Text("name: ${widget.moleculeClass.name}\n"),
               Text("type: ${widget.moleculeClass.type}\n"),
@@ -354,7 +376,7 @@ class _HelloWorldState extends State<HelloWorld> {
       drawerHeight: 180.0,
 
       /// drawer background color.
-      color: Colors.black,//.shade800,
+      color: Colors.black, //.shade800,
 
       /// drawer controller.
       controller: bottomController,

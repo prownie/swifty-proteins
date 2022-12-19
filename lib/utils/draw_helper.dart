@@ -14,13 +14,12 @@ loadFont() async {
 }
 
 class DrawHelper {
-  late three.MeshBasicMaterial texture;
+  late three.MeshLambertMaterial texture;
   late three.SphereGeometry sphere;
   late three.Mesh atomToDraw;
   late List<Atom> atomList;
 
-  drawMolecule(List<Atom> list, three.Group moleculeDraw,
-      List<three.Mesh> moleculeLabels) {
+  drawMolecule(List<Atom> list, three.Group moleculeDraw) {
     atomList = list;
 
     for (var atom in atomList) {
@@ -34,7 +33,8 @@ class DrawHelper {
 
   drawAtom(Atom atom, three.Group moleculeDraw) {
     sphere = three.SphereGeometry(0.3);
-    texture = three.MeshBasicMaterial({"color": Constants.atomsCPK[atom.name]});
+    texture =
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atom.name]});
     atomToDraw = three.Mesh(sphere, texture);
     atomToDraw.position
         .set(atom.coordinates.x, atom.coordinates.y, atom.coordinates.z);
@@ -51,7 +51,7 @@ class DrawHelper {
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
 
     var mesh = three.Mesh(bond,
-        three.MeshBasicMaterial({"color": Constants.atomsCPK[atomX.name]}));
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
     mesh.position.copy(atomX.coordinates);
     mesh.lookAt(atomY.coordinates);
     moleculeDraw.add(mesh);
@@ -67,7 +67,7 @@ class DrawHelper {
     firstBond.applyMatrix4(
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
     var mesh = three.Mesh(firstBond,
-        three.MeshBasicMaterial({"color": Constants.atomsCPK[atomX.name]}));
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
     mesh.position.copy(atomX.coordinates);
     mesh.lookAt(atomY.coordinates);
     moleculeDraw.add(mesh);
@@ -79,16 +79,17 @@ class DrawHelper {
     secondBond.applyMatrix4(
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
     mesh = three.Mesh(secondBond,
-        three.MeshBasicMaterial({"color": Constants.atomsCPK[atomX.name]}));
+        three.MeshLambertMaterial({"color": Constants.atomsCPK[atomX.name]}));
     mesh.position.copy(atomX.coordinates);
     mesh.lookAt(atomY.coordinates);
     moleculeDraw.add(mesh);
   }
 
-  dispAtomName(
-      Atom atom, three.Group moleculeDraw, List<three.Mesh> labelList) async {
+  Future<three.Mesh> dispAtomName(double x, double y, double z, String atomName,
+      three.Group moleculeDraw) async {
+    print('in dispatomname, name=' + atomName);
     var font = await loadFont();
-    var textGeo = three.TextGeometry(atom.name, {
+    var textGeo = three.TextGeometry(atomName, {
       "font": font,
       "size": 0.5,
       "height": 0.01,
@@ -101,16 +102,18 @@ class DrawHelper {
 
     var centerOffset =
         -0.5 * (textGeo.boundingBox!.max.x - textGeo.boundingBox!.min.x);
-    var textMesh1 = three.Mesh(textGeo,
-        three.MeshPhongMaterial({"color": Constants.atomsCPK[atom.name]}));
+    // var textMesh1 = three.Mesh(textGeo,
+    //     three.MeshLambertMaterial({"color": Constants.atomsCPK[atomName]}));
+    var textMesh1 =
+        three.Mesh(textGeo, three.MeshLambertMaterial({"color": 0xFF0000}));
 
-    textMesh1.position.x = atom.coordinates.x;
-    textMesh1.position.y = atom.coordinates.y + centerOffset;
-    textMesh1.position.z = atom.coordinates.z;
+    textMesh1.position.x = x;
+    textMesh1.position.y = y + centerOffset;
+    textMesh1.position.z = z;
 
     textMesh1.rotation.x = 0;
     textMesh1.rotation.y = three.Math.PI * 2;
     moleculeDraw.add(textMesh1);
-    labelList.add(textMesh1);
+    return textMesh1;
   }
 }
