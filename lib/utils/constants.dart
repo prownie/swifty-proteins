@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 
 class Constants {
+  static const atomBonds = {
+    'CU': 2,
+    'P': 5,
+    'S': 2,
+    'C': 4,
+    'H': 1,
+    'N': 3,
+    'O': 2,
+    'F': 1,
+    'CL': 1,
+    'BR': 1
+  };
   static const atomsCPK = {
     'H': 0xFFFFFF,
     'HE': 0xD9FFFF,

@@ -50,8 +50,15 @@ class _HelloWorldState extends State<HelloWorld> {
   dynamic mesh;
   dynamic targetRotationX = 0.0;
   dynamic targetRotationY = 0.0;
+  dynamic targetCameraPosition = 10.0;
   dynamic targetRotationOnPointerDownX = 0.0;
   dynamic targetRotationOnPointerDownY = 0.0;
+
+  //Zoom
+  Offset _initialFocalPoint = Offset.zero;
+  Offset _initalRotatePoint = Offset.zero;
+  double _scale = 1.0;
+  double _initialScale = 1.0;
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
 
@@ -119,12 +126,13 @@ class _HelloWorldState extends State<HelloWorld> {
 
   initImage() {
     scene = three.Scene();
+    scene.background = three.Color(0xf0f0f0);
     molecule = three.Group();
     List<Atom> atomList = [];
-    var ambientLight = three.AmbientLight(0xcccccc, 0.4);
+    var ambientLight = three.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
-    var light = three.DirectionalLight(0xffffff, null);
-    light.position.set(4, 4, 1);
+    var light = three.DirectionalLight(0xc0c0c0, null);
+    light.position.set(0.5, 0, 1);
     light.castShadow = true;
     light.shadow!.camera!.zoom = 1; // tighter shadow map
     scene.add(light);
@@ -132,7 +140,7 @@ class _HelloWorldState extends State<HelloWorld> {
     scene.add(molecule);
 
     camera.lookAt(scene.position);
-    camera.position.z = 20;
+    camera.position.z = 10;
     // mesh.rotation.x = 5;
     loaded = true;
     animate();
@@ -155,6 +163,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
     molecule.rotation.y += (targetRotationX - molecule.rotation.y) * 0.05;
     molecule.rotation.x += (targetRotationY - molecule.rotation.x) * 0.05;
+    camera.position.z += (targetCameraPosition - camera.position.z) * 0.5;
     // molecule.rotation.x += 0.01;
     // molecule.rotation.y += 0.01;
     render();
@@ -175,17 +184,14 @@ class _HelloWorldState extends State<HelloWorld> {
     super.dispose();
   }
 
-  _rotateMolecule(PointerEvent details) async {
-    pointerMove.x = details.position.dx - width / 2;
-    pointerMove.y = details.position.dy - height / 2;
-    targetRotationX =
-        targetRotationOnPointerDownX + (pointerMove.x - pointerDown.x) * 0.02;
-    targetRotationY =
-        targetRotationOnPointerDownY + (pointerMove.y - pointerDown.y) * 0.02;
+  _rotateMolecule(ScaleUpdateDetails details) async {
+    targetRotationX -=
+        (_initalRotatePoint.dx - details.localFocalPoint.dx) * 0.0003;
+    targetRotationY -=
+        (_initalRotatePoint.dy - details.localFocalPoint.dy) * 0.0003;
   }
 
   _getLocations(PointerEvent details) async {
-    print("getLocationCalled");
     pointerDown.x = details.position.dx - width / 2;
     pointerDown.y = details.position.dy - height / 2;
     targetRotationOnPointerDownX = targetRotationX;
@@ -193,16 +199,12 @@ class _HelloWorldState extends State<HelloWorld> {
 
     pointer.x = (details.position.dx / width) * 2 - 1;
     pointer.y = -((details.position.dy - 80) / height) * 2 + 1;
-    print('width:${width}, height:${height}');
-    print('x:${details.position.dx}, y: ${details.position.dy}');
-    print('pointerx:${pointer.x}, y: ${pointer.y}');
     var raycaster = three.Raycaster();
     raycaster.setFromCamera(pointer, camera);
 
     // calculate objects intersecting the picking ray
     var intersects = raycaster.intersectObjects(scene.children, true);
 
-    print('interscetlength: ${intersects.length}');
     for (var i = 0; i < intersects.length; i++) {
       if (intersects[i].object.geometry!.type == 'SphereGeometry') {
         if (atomLabel != null) {
@@ -218,6 +220,10 @@ class _HelloWorldState extends State<HelloWorld> {
     }
   }
 
+  _zoomPanMolecule(details) {
+    if (details.pointerCount == 2) {}
+  }
+
   Widget _build(BuildContext context) {
     return Container(
         width: width,
@@ -225,13 +231,39 @@ class _HelloWorldState extends State<HelloWorld> {
         color: Colors.red,
         child: Builder(
           builder: (BuildContext context) {
-            print(three3dRender);
-            return Listener(
-                onPointerMove: _rotateMolecule,
-                onPointerDown: _getLocations,
-                child: three3dRender.isInitialized
-                    ? Texture(textureId: three3dRender.textureId!)
-                    : Container(color: Colors.yellow));
+            return GestureDetector(
+              onScaleStart: (details) {
+                if (details.pointerCount == 2) {
+                  _initialFocalPoint = details.focalPoint;
+                  _initialScale = 1.0;
+                } else if (details.pointerCount == 1) {
+                  _initalRotatePoint = details.localFocalPoint;
+                }
+              },
+              onScaleUpdate: (details) {
+                if (details.pointerCount == 2) {
+                  if (details.scale - _initialScale < 0) {
+                    //moving away
+                    targetCameraPosition -= (details.scale - _initialScale) * 5;
+                  } else {
+                    // moving closer
+                    targetCameraPosition -= (details.scale - _initialScale) * 2;
+                  }
+                  _initialScale = details.scale;
+                  print("details scale:" + details.scale.toString());
+                } else if (details.pointerCount == 1) {
+                  _rotateMolecule(details);
+                }
+              },
+              child: three3dRender.isInitialized
+                  ? Texture(textureId: three3dRender.textureId!)
+                  : Container(color: Colors.yellow),
+              // child: Listener(
+              //   onPointerMove: _rotateMolecule,
+              //   onPointerDown: _getLocations,
+
+              // ),
+            );
           },
         ));
   }

@@ -8,8 +8,6 @@ import 'dart:math' as math;
 loadFont() async {
   var loader = new three_jsm.TYPRLoader(null);
   var fontJson = await loader.loadAsync("assets/fonts/Yagora.ttf");
-  print("caca");
-  print(fontJson);
   return three.TYPRFont(fontJson);
 }
 
@@ -25,7 +23,12 @@ class DrawHelper {
     for (var atom in atomList) {
       drawAtom(atom, moleculeDraw);
       for (var indexConnectedAtom in atom.connect) {
-        drawConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
+        if (atom.connect.where((e) => e == indexConnectedAtom).length > 1) {
+          print("more than one found");
+          drawDoubleConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
+        } else {
+          drawConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
+        }
         // dispAtomName(atom, moleculeDraw, moleculeLabels);
       }
     }
