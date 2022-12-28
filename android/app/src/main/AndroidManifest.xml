@@ -5,6 +5,7 @@
         android:label="swifty_proteins"
         android:name="${applicationName}"
 		android:allowBackup="false"
+        android:requestLegacyExternalStorage="true"
         tools:replace="android:label,android:allowBackup">
         <activity
             android:name=".MainActivity"

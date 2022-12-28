@@ -60,7 +60,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
       print(state);
       if (_stateHistoryList[_stateHistoryList.length - 1] ==
           AppLifecycleState.resumed) {
-        showLogginDialog(context);
+      //  showLogginDialog(context);
       }
     });
   }
