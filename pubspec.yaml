@@ -43,6 +43,14 @@ dependencies:
   http: ^0.13.5
   three_dart_jsm: ^0.0.9
   bottom_drawer: ^0.0.5
+  local_auth: ^2.1.2 
+  path_provider: ^2.0.11
+  permission_handler: ^10.2.0
+  native_screenshot: ^1.0.0
+  share_plus: ^6.3.0
+  share: ^2.0.4
+
+
 
 dev_dependencies:
   flutter_test:

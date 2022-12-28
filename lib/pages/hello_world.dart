@@ -1,6 +1,12 @@
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:swifty_proteins/pages/homepage.dart';
 import 'package:swifty_proteins/utils/draw_helper.dart';
 import 'package:three_dart/three_dart.dart' as three;
@@ -11,6 +17,19 @@ import '../style/style.dart' as s;
 import '../model/base_list.dart';
 import '../model/molecule.dart';
 import 'package:bottom_drawer/bottom_drawer.dart';
+
+import 'package:share_plus/share_plus.dart';
+//import 'package:share_files_and_screenshot_widgets/share_files_and_screenshot_widgets.dart';
+//import 'package:share/share.dart';
+import 'package:native_screenshot/native_screenshot.dart';
+//import 'package:screenshot_share_image/screenshot_share_image.dart';
+
+import 'package:http/http.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import '../widget/moleculeCard.dart';
 
@@ -61,10 +80,12 @@ class _HelloWorldState extends State<HelloWorld> {
   double _initialScale = 1.0;
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
+  late Uint8List _imageFile;
+  GlobalKey globalKey = GlobalKey();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height - 76;
+    height = screenSize!.height - 76; // safe area
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -223,13 +244,30 @@ class _HelloWorldState extends State<HelloWorld> {
   _zoomPanMolecule(details) {
     if (details.pointerCount == 2) {}
   }
+  // Future<String> saveImage(Uint8List bytes) async {
+  //   await [Permission.storage].request();
+  //   final result = await ImageGallerySaver.saveImage(bytes);
+  //   return result['filePath'];
+  // }
+
+  // Future<void> _capturePng() {
+  //   return Future.delayed(const Duration(milliseconds: 2000), () async {
+  //     RenderRepaintBoundary? boundary = globalKey.currentContext
+  //         ?.findRenderObject() as RenderRepaintBoundary?;
+  //     ui.Image image = await boundary!.toImage();
+  //     ByteData? byteData =
+  //         await image.toByteData(format: ui.ImageByteFormat.png);
+  //     Uint8List pngBytes = byteData!.buffer.asUint8List();
+  //     saveImage(pngBytes);
+  //   });
+  // }
 
   Widget _build(BuildContext context) {
     return Container(
         width: width,
         height: height,
-        color: Colors.red,
-        child: Builder(
+        color: Colors.blue,
+        child: Container(child: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
               onScaleStart: (details) {
@@ -265,91 +303,116 @@ class _HelloWorldState extends State<HelloWorld> {
               // ),
             );
           },
-        ));
+        )));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          title: Text(widget.moleculeClass.name),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.info_rounded),
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) =>
-                      buildCard(context, widget.moleculeClass)),
-            )
-          ],
-        ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // exit drawer
-                  Navigator.pop(context); // return to homepage
-                },
-                child: Container(
-                    color: Colors.red,
-                    height: 50,
-                    child: const Center(child: Text("return"))),
-              ),
-              TextField(
-                onSubmitted: (value) {
-                  //---------------------------------------//
-                  //
-                  //
-                  //    HERRRRRRRREEEEEEE utilise value
-                  //
-                  //
-                  //---------------------------------------//
-                },
-                decoration: const InputDecoration(
-                  hintText: "search another one",
+    return RepaintBoundary(
+        key: globalKey,
+        child: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.black,
+              title: Text(widget.moleculeClass.name),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.info_rounded),
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) =>
+                          buildCard(context, widget.moleculeClass)),
                 ),
+                IconButton(
+                    icon: const Icon(Icons.save),
+                    onPressed: () async {
+                      await [Permission.manageExternalStorage].request();
+                      await [Permission.storage].request();
+                      var status =
+                          await Permission.manageExternalStorage.status;
+                      var status1 = await Permission.storage.status;
+                      String? path = await NativeScreenshot.takeScreenshot();
+                      //show toast to notify screen succesfully
+                    }),
+                IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () async {
+                      await [Permission.manageExternalStorage].request();
+                      await [Permission.storage].request();
+                      var status =
+                          await Permission.manageExternalStorage.status;
+                      var status1 = await Permission.storage.status;
+                      String? path = await NativeScreenshot.takeScreenshot();
+                      if (path != null) {
+                        await Share.shareXFiles([XFile(path)],
+                            text: 'Great picture');
+                        await File(path).delete();
+                      }
+                    }),
+              ],
+            ),
+            drawer: Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); // exit drawer
+                      Navigator.pop(context); // return to homepage
+                    },
+                    child: Container(
+                        color: Colors.red,
+                        height: 50,
+                        child: const Center(child: Text("return"))),
+                  ),
+                  TextField(
+                    onSubmitted: (value) {
+                      //---------------------------------------//
+                      //
+                      //
+                      //    HERRRRRRRREEEEEEE utilise value
+                      //
+                      //
+                      //---------------------------------------//
+                    },
+                    decoration: const InputDecoration(
+                      hintText: "search another one",
+                    ),
+                  ),
+                  SizedBox(
+                      height: 400,
+                      width: 20,
+                      child: Scrollbar(
+                          child: ListView.separated(
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                    onTap: () {
+                                      print(baselist[index]);
+                                      //---------------------------------------//
+                                      //
+                                      //
+                                      //    HERRRRRRRREEEEEEE au bout mon petit
+                                      //
+                                      //
+                                      //---------------------------------------//
+                                    },
+                                    child: SizedBox(
+                                      height: 30,
+                                      child:
+                                          Center(child: Text(baselist[index])),
+                                    ));
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const Divider(),
+                              itemCount: baselist.length))),
+                ],
               ),
-              SizedBox(
-                  height: 400,
-                  width: 20,
-                  child: Scrollbar(
-                      child: ListView.separated(
-                          itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                                onTap: () {
-                                  print(baselist[index]);
-                                  //---------------------------------------//
-                                  //
-                                  //
-                                  //    HERRRRRRRREEEEEEE au bout mon petit
-                                  //
-                                  //
-                                  //---------------------------------------//
-                                },
-                                child: SizedBox(
-                                  height: 30,
-                                  child: Center(child: Text(baselist[index])),
-                                ));
-                          },
-                          separatorBuilder: (context, index) => const Divider(),
-                          itemCount: baselist.length))),
-            ],
-          ),
-        ),
-        body: Builder(builder: (BuildContext context) {
-          initSize(context);
-          return Stack(
-            children: [
-              Container(
-                child: _build(context),
-              ),
-              buildBottomDrawer(context)
-            ],
-          );
-        }));
+            ),
+            body: Builder(builder: (BuildContext context) {
+              initSize(context);
+              return Stack(
+                children: [_build(context), buildBottomDrawer(context)],
+              );
+            })));
   }
 
   Widget buildBottomDrawer(BuildContext context) {
