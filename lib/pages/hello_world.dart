@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:swifty_proteins/pages/homepage.dart';
@@ -18,7 +17,6 @@ import '../style/style.dart' as s;
 import '../model/base_list.dart';
 import '../model/molecule.dart';
 import 'package:bottom_drawer/bottom_drawer.dart';
-import 'package:screenshot/screenshot.dart';
 
 import 'package:share_plus/share_plus.dart';
 //import 'package:share_files_and_screenshot_widgets/share_files_and_screenshot_widgets.dart';
@@ -75,7 +73,6 @@ class _HelloWorldState extends State<HelloWorld> {
   dynamic targetRotationOnPointerDownY = 0.0;
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
-  ScreenshotController screenshotController = ScreenshotController();
   late Uint8List _imageFile;
   GlobalKey globalKey = GlobalKey();
 
@@ -242,23 +239,23 @@ class _HelloWorldState extends State<HelloWorld> {
     }
   }
 
-  Future<String> saveImage(Uint8List bytes) async {
-    await [Permission.storage].request();
-    final result = await ImageGallerySaver.saveImage(bytes);
-    return result['filePath'];
-  }
+  // Future<String> saveImage(Uint8List bytes) async {
+  //   await [Permission.storage].request();
+  //   final result = await ImageGallerySaver.saveImage(bytes);
+  //   return result['filePath'];
+  // }
 
-  Future<void> _capturePng() {
-    return Future.delayed(const Duration(milliseconds: 2000), () async {
-      RenderRepaintBoundary? boundary = globalKey.currentContext
-          ?.findRenderObject() as RenderRepaintBoundary?;
-      ui.Image image = await boundary!.toImage();
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
-      saveImage(pngBytes);
-    });
-  }
+  // Future<void> _capturePng() {
+  //   return Future.delayed(const Duration(milliseconds: 2000), () async {
+  //     RenderRepaintBoundary? boundary = globalKey.currentContext
+  //         ?.findRenderObject() as RenderRepaintBoundary?;
+  //     ui.Image image = await boundary!.toImage();
+  //     ByteData? byteData =
+  //         await image.toByteData(format: ui.ImageByteFormat.png);
+  //     Uint8List pngBytes = byteData!.buffer.asUint8List();
+  //     saveImage(pngBytes);
+  //   });
+  // }
 
   Widget _build(BuildContext context) {
     return Container(
@@ -294,20 +291,28 @@ class _HelloWorldState extends State<HelloWorld> {
                       builder: (context) =>
                           buildCard(context, widget.moleculeClass)),
                 ),
+                 IconButton(
+                    icon: const Icon(Icons.save),
+                    onPressed: () async {
+                      await [Permission.manageExternalStorage].request();
+                      await [Permission.storage].request();
+                      var status = await Permission.manageExternalStorage.status;
+                      var status1 = await Permission.storage.status;
+                      String? path = await NativeScreenshot.takeScreenshot();
+                      //show toast to notify screen succesfully
+                    }),
                 IconButton(
                     icon: const Icon(Icons.share),
                     onPressed: () async {
                       await [Permission.manageExternalStorage].request();
                       await [Permission.storage].request();
                       var status = await Permission.manageExternalStorage.status;
-                      print(status);
                       var status1 = await Permission.storage.status;
-                      print(status1);
                       String? path = await NativeScreenshot.takeScreenshot();
-                      //_capturePng();
-                      //final image = await screenshotController.capture();
-                      //if (image == null) return;
-                      //await saveImage(image);
+                      if (path != null){
+                        await Share.shareXFiles([XFile(path)], text: 'Great picture');
+                        await File(path).delete();
+                      }
                     }),
               ],
             ),
