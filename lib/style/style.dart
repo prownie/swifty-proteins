@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
 abstract class Style {
-  static final listBox = BoxDecoration(
-    color: Colors.grey.shade800,
-    border: Border.all(color: Colors.black, width: 2),
+  static final rickBox = BoxDecoration(
+    color: Colors.grey.shade300,
+    border: Border.all(color: MyColor.rickBlue, width: 4),
     borderRadius: const BorderRadius.all(Radius.circular(20)),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.3),
-        spreadRadius: 5,
-        blurRadius: 7,
-        offset: const Offset(0, 3), // changes position of shadow
-      ),
-    ],
   );
+  static final mortyBox = BoxDecoration(
+    color: Colors.grey.shade300,
+    border: Border.all(color: MyColor.mortyYellow, width: 4),
+    borderRadius: const BorderRadius.all(Radius.circular(20)),
+  );
+}
+
+abstract class MyColor {
+  static const background = Color(0xf0f0f0f0);
+  static const mortyYellow = Color(0xffEFD96B);
+  static const rickBlue = Color.fromARGB(255, 131, 210, 228);
 }

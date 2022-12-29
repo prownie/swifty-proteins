@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import '../model/atom.dart';
 import '../model/molecule.dart';
@@ -161,9 +163,6 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
         AppBar().preferredSize.height + MediaQuery.of(context).padding.top;
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        // appBar: AppBar(
-        //   title: const Text('Atomizator'),
-        // ),
         body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
           SizedBox(
             width: maxWidth,
@@ -183,7 +182,14 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                         selected = 0;
                       });
                     },
-                    child: const Center(child: Text('Atomizator')),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                       Text('R&M data', style: TextStyle(fontSize: 25),),
+                       Divider(height: 3,color: Colors.black,),
+                       Text('A quick access to your characters favorites molecules'),
+                      ]
+                    ),
                   ),
                 ),
                 AnimatedPositioned(
@@ -204,7 +210,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                       });
                     },
                     child: Container(
-                      decoration: s.Style.listBox,
+                      decoration: s.Style.rickBox,
                       child: searchWidget(),
                     ),
                   ),
@@ -227,7 +233,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                       });
                     },
                     child: Container(
-                      decoration: s.Style.listBox,
+                      decoration: s.Style.mortyBox,
                       child: listWidget(),
                     ),
                   ),
@@ -257,7 +263,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                                 margin: const EdgeInsets.only(
                                     top: 17, right: 30, left: 30),
                                 height: 50,
-                                decoration: s.Style.listBox,
+                                decoration: s.Style.mortyBox,
                                 //color: Colors.amber[baselist[index]],
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,

@@ -85,7 +85,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height - 76; // safe area
+    height = screenSize!.height;// - 76; // safe area
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -311,49 +311,58 @@ class _HelloWorldState extends State<HelloWorld> {
     return RepaintBoundary(
         key: globalKey,
         child: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.black,
-              title: Text(widget.moleculeClass.name),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.info_rounded),
-                  onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) =>
-                          buildCard(context, widget.moleculeClass)),
-                ),
-                IconButton(
-                    icon: const Icon(Icons.save),
-                    onPressed: () async {
-                      await [Permission.manageExternalStorage].request();
-                      await [Permission.storage].request();
-                      var status =
-                          await Permission.manageExternalStorage.status;
-                      var status1 = await Permission.storage.status;
-                      String? path = await NativeScreenshot.takeScreenshot();
-                      //show toast to notify screen succesfully
-                    }),
-                IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: () async {
-                      await [Permission.manageExternalStorage].request();
-                      await [Permission.storage].request();
-                      var status =
-                          await Permission.manageExternalStorage.status;
-                      var status1 = await Permission.storage.status;
-                      String? path = await NativeScreenshot.takeScreenshot();
-                      if (path != null) {
-                        await Share.shareXFiles([XFile(path)],
-                            text: 'Great picture');
-                        await File(path).delete();
-                      }
-                    }),
-              ],
-            ),
+          //appBar:PreferredSize(child: getAppBar(context),preferredSize: Size.fromHeight(60),),
+            //appBar: AppBar(
+            //  backgroundColor:Colors.grey,// s.MyColor.background,
+            //  shape: const RoundedRectangleBorder(
+            //      borderRadius: BorderRadius.vertical(
+            //    bottom: Radius.circular(30),
+            //  )),
+            //  title: Text(widget.moleculeClass.name),
+            //  actions: [
+            //    IconButton(
+            //      icon: const Icon(
+            //        Icons.info_rounded,
+            //        color: Colors.black,
+            //      ),
+            //      onPressed: () => showDialog(
+            //          context: context,
+            //          builder: (context) =>
+            //              buildCard(context, widget.moleculeClass)),
+            //    ),
+            //    IconButton(
+            //        icon: const Icon(Icons.save),
+            //        onPressed: () async {
+            //          await [Permission.manageExternalStorage].request();
+            //          await [Permission.storage].request();
+            //          var status =
+            //              await Permission.manageExternalStorage.status;
+            //          var status1 = await Permission.storage.status;
+            //          String? path = await NativeScreenshot.takeScreenshot();
+            //          //show toast to notify screen succesfully
+            //        }),
+            //    IconButton(
+            //        icon: const Icon(Icons.share),
+            //        onPressed: () async {
+            //          await [Permission.manageExternalStorage].request();
+            //          await [Permission.storage].request();
+            //          var status =
+            //              await Permission.manageExternalStorage.status;
+            //          var status1 = await Permission.storage.status;
+            //          String? path = await NativeScreenshot.takeScreenshot();
+            //          if (path != null) {
+            //            await Share.shareXFiles([XFile(path)],
+            //                text: 'Great picture');
+            //            await File(path).delete();
+            //          }
+            //        }),
+            //  ],
+            //),
             drawer: Drawer(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top),
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context); // exit drawer
@@ -410,9 +419,72 @@ class _HelloWorldState extends State<HelloWorld> {
             body: Builder(builder: (BuildContext context) {
               initSize(context);
               return Stack(
-                children: [_build(context), buildBottomDrawer(context)],
+                children: [
+                  _build(context),
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.07,
+                    left: 0,
+                    right: 0,
+                    //height: 80,
+                    child: getAppBar(context),
+                  ),
+                  buildBottomDrawer(context)
+                ],
               );
             })));
+  }
+
+  Widget getAppBar(context) {
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop:true,
+      child: AppBar(
+          backgroundColor: s.MyColor.rickBlue , // s.MyColor.background,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+            top: Radius.circular(50),
+          )),
+          title: Text(widget.moleculeClass.letterCode),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.info_rounded,
+                //color: Color.fromARGB(255, 213, 207, 192),
+              ),
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) =>
+                      buildCard(context, widget.moleculeClass)),
+            ),
+            IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: () async {
+                  await [Permission.manageExternalStorage].request();
+                  await [Permission.storage].request();
+                  var status = await Permission.manageExternalStorage.status;
+                  var status1 = await Permission.storage.status;
+                  String? path = await NativeScreenshot.takeScreenshot();
+                  //show toast to notify screen succesfully
+                }),
+            IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () async {
+                  await [Permission.manageExternalStorage].request();
+                  await [Permission.storage].request();
+                  var status = await Permission.manageExternalStorage.status;
+                  var status1 = await Permission.storage.status;
+                  String? path = await NativeScreenshot.takeScreenshot();
+                  if (path != null) {
+                    await Share.shareXFiles([XFile(path)],
+                        text: 'Great picture');
+                    await File(path).delete();
+                  }
+                }),
+          ]
+          ));
+       // ),
+     // );
   }
 
   Widget buildBottomDrawer(BuildContext context) {
