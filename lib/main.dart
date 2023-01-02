@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:swifty_proteins/widget/login.dart';
 import 'pages/hello_world.dart';
 import 'pages/homepage.dart';
+import 'widget/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +22,8 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
         primarySwatch: Colors.blue,
       ),
-      home: Homepage(),
+      // ignore: unrelated_type_equality_checks
+      home:Initialize(),
     );
   }
 }

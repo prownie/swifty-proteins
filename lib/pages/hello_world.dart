@@ -449,7 +449,7 @@ class _HelloWorldState extends State<HelloWorld> {
           actions: [
             IconButton(
               icon: const Icon(
-                Icons.info_rounded,
+                Icons.remove_red_eye ,
                 //color: Color.fromARGB(255, 213, 207, 192),
               ),
               onPressed: () => showDialog(
@@ -489,8 +489,6 @@ class _HelloWorldState extends State<HelloWorld> {
 
   Widget buildBottomDrawer(BuildContext context) {
     return BottomDrawer(
-      //followTheBody: false,
-      /// your customized drawer header.
       header: GestureDetector(
           onTap: () => (bottomController.open()),
           child: Container(
@@ -498,16 +496,16 @@ class _HelloWorldState extends State<HelloWorld> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
+                  Icons.arrow_drop_up,
+                  color: Colors.black,
                 ),
                 const Text(
                   "Info",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.black),
                 ),
                 const Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
+                  Icons.arrow_drop_up,
+                  color: Colors.black,
                 ),
                 labelMolecule != null
                     ? Text(labelMolecule!)
@@ -515,19 +513,17 @@ class _HelloWorldState extends State<HelloWorld> {
               ],
             ),
           )),
-
-      /// your customized drawer body.
       body: GestureDetector(
         onTap: () => (bottomController.close()),
         child: Container(
           width: 300,
           child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Text("formula: ${widget.moleculeClass.formula}\n"),
-              Text("name: ${widget.moleculeClass.name}\n"),
+              Text("name: ${widget.moleculeClass.name}\n", maxLines: 1, overflow: TextOverflow.ellipsis,),
               Text("type: ${widget.moleculeClass.type}\n"),
               Text("letter code: ${widget.moleculeClass.letterCode}\n"),
               //Text(mol.weight),
@@ -543,7 +539,7 @@ class _HelloWorldState extends State<HelloWorld> {
       drawerHeight: 180.0,
 
       /// drawer background color.
-      color: Colors.black, //.shade800,
+      color: Colors.transparent, //.shade800,
 
       /// drawer controller.
       controller: bottomController,

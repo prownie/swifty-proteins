@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import '../model/atom.dart';
 import '../model/molecule.dart';
 import 'hello_world.dart';
@@ -9,9 +12,38 @@ import '../style/style.dart' as s;
 import '../utils/parse.dart';
 import '../widget/moleculeCard.dart';
 import '../widget/popUp404.dart';
-import '../widget/auth.dart';
+// import 'package:local_auth/error_codes.dart' as auth_error;
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
+
+Future<dynamic> _authenticate() async {
+  final LocalAuthentication auth = LocalAuthentication();
+  final List<BiometricType> availableBiometrics =
+      await auth.getAvailableBiometrics();
+  final bool isBiometricsAvailable = await auth.isDeviceSupported();
+  if (!isBiometricsAvailable || availableBiometrics.isEmpty) return;
+
+  try {
+    var ret = await auth.authenticate(
+      localizedReason: 'Scan Fingerprint To Enter',
+      options: const AuthenticationOptions(
+        useErrorDialogs: true,
+        stickyAuth: true,
+        biometricOnly: true,
+      ),
+    );
+    if (ret == false) {
+      exit(1);
+    }
+  } on PlatformException catch (e) {
+    print(e);
+    exit(1);
+    // if (e.code == auth_error.lockedOut) {
+    // return errorAuth(BuildContext);
+    // }
+    //exit(0);
+  }
+}
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -57,12 +89,12 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
+    setState(() async {
       _stateHistoryList.add(state);
       print(state);
       if (_stateHistoryList[_stateHistoryList.length - 1] ==
           AppLifecycleState.resumed) {
-      //  showLogginDialog(context);
+        await _authenticate();
       }
     });
   }
@@ -183,13 +215,19 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                       });
                     },
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                       Text('R&M data', style: TextStyle(fontSize: 25),),
-                       Divider(height: 3,color: Colors.black,),
-                       Text('A quick access to your characters favorites molecules'),
-                      ]
-                    ),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'R&M data',
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          Divider(
+                            height: 3,
+                            color: Colors.black,
+                          ),
+                          Text(
+                              'A quick access to your characters favorites molecules'),
+                        ]),
                   ),
                 ),
                 AnimatedPositioned(
