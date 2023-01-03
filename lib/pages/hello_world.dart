@@ -1,6 +1,6 @@
-import 'dart:io';
-import 'dart:ui';
+import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -9,29 +9,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:swifty_proteins/pages/homepage.dart';
 import 'package:swifty_proteins/utils/draw_helper.dart';
+import 'package:swifty_proteins/utils/share_utils.dart';
 import 'package:three_dart/three_dart.dart' as three;
-import 'package:flutter/material.dart';
-import '../utils/constants.dart';
-import '../model/atom.dart';
-import '../style/style.dart' as s;
-import '../model/base_list.dart';
-import '../model/molecule.dart';
 import 'package:bottom_drawer/bottom_drawer.dart';
-
-import 'package:share_plus/share_plus.dart';
-//import 'package:share_files_and_screenshot_widgets/share_files_and_screenshot_widgets.dart';
-//import 'package:share/share.dart';
-import 'package:native_screenshot/native_screenshot.dart';
-//import 'package:screenshot_share_image/screenshot_share_image.dart';
-
-import 'package:http/http.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import '../model/atom.dart';
+import '../model/base_list.dart';
+import '../model/molecule.dart';
+import '../utils/constants.dart';
+import '../utils/share_utils.dart';
 import '../widget/moleculeCard.dart';
+import '../style/style.dart' as s;
 
 class HelloWorld extends StatefulWidget {
   HelloWorld(this.moleculeClass);
@@ -85,7 +75,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height;// - 76; // safe area
+    height = screenSize!.height; // - 76; // safe area
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -219,7 +209,7 @@ class _HelloWorldState extends State<HelloWorld> {
     targetRotationOnPointerDownY = targetRotationY;
 
     pointer.x = (details.position.dx / width) * 2 - 1;
-    pointer.y = -((details.position.dy - 80) / height) * 2 + 1;
+    pointer.y = -((details.position.dy /*- 80*/) / height) * 2 + 1;
     var raycaster = three.Raycaster();
     raycaster.setFromCamera(pointer, camera);
 
@@ -311,53 +301,6 @@ class _HelloWorldState extends State<HelloWorld> {
     return RepaintBoundary(
         key: globalKey,
         child: Scaffold(
-          //appBar:PreferredSize(child: getAppBar(context),preferredSize: Size.fromHeight(60),),
-            //appBar: AppBar(
-            //  backgroundColor:Colors.grey,// s.MyColor.background,
-            //  shape: const RoundedRectangleBorder(
-            //      borderRadius: BorderRadius.vertical(
-            //    bottom: Radius.circular(30),
-            //  )),
-            //  title: Text(widget.moleculeClass.name),
-            //  actions: [
-            //    IconButton(
-            //      icon: const Icon(
-            //        Icons.info_rounded,
-            //        color: Colors.black,
-            //      ),
-            //      onPressed: () => showDialog(
-            //          context: context,
-            //          builder: (context) =>
-            //              buildCard(context, widget.moleculeClass)),
-            //    ),
-            //    IconButton(
-            //        icon: const Icon(Icons.save),
-            //        onPressed: () async {
-            //          await [Permission.manageExternalStorage].request();
-            //          await [Permission.storage].request();
-            //          var status =
-            //              await Permission.manageExternalStorage.status;
-            //          var status1 = await Permission.storage.status;
-            //          String? path = await NativeScreenshot.takeScreenshot();
-            //          //show toast to notify screen succesfully
-            //        }),
-            //    IconButton(
-            //        icon: const Icon(Icons.share),
-            //        onPressed: () async {
-            //          await [Permission.manageExternalStorage].request();
-            //          await [Permission.storage].request();
-            //          var status =
-            //              await Permission.manageExternalStorage.status;
-            //          var status1 = await Permission.storage.status;
-            //          String? path = await NativeScreenshot.takeScreenshot();
-            //          if (path != null) {
-            //            await Share.shareXFiles([XFile(path)],
-            //                text: 'Great picture');
-            //            await File(path).delete();
-            //          }
-            //        }),
-            //  ],
-            //),
             drawer: Drawer(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -436,55 +379,40 @@ class _HelloWorldState extends State<HelloWorld> {
 
   Widget getAppBar(context) {
     return MediaQuery.removePadding(
-      context: context,
-      removeTop:true,
-      child: AppBar(
-          backgroundColor: s.MyColor.rickBlue , // s.MyColor.background,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(50),
-            top: Radius.circular(50),
-          )),
-          title: Text(widget.moleculeClass.letterCode),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.remove_red_eye ,
-                //color: Color.fromARGB(255, 213, 207, 192),
+        context: context,
+        removeTop: true,
+        child: AppBar(
+            backgroundColor: s.MyColor.rickBlue, // s.MyColor.background,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(50),
+              top: Radius.circular(50),
+            )),
+            title: Text(widget.moleculeClass.letterCode),
+            actions: [
+              IconButton(
+                icon: const Icon(
+                  Icons.remove_red_eye,
+                  //color: Color.fromARGB(255, 213, 207, 192),
+                ),
+                onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) =>
+                        buildCard(context, widget.moleculeClass)),
               ),
-              onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) =>
-                      buildCard(context, widget.moleculeClass)),
-            ),
-            IconButton(
-                icon: const Icon(Icons.save),
-                onPressed: () async {
-                  await [Permission.manageExternalStorage].request();
-                  await [Permission.storage].request();
-                  var status = await Permission.manageExternalStorage.status;
-                  var status1 = await Permission.storage.status;
-                  String? path = await NativeScreenshot.takeScreenshot();
-                  //show toast to notify screen succesfully
-                }),
-            IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: () async {
-                  await [Permission.manageExternalStorage].request();
-                  await [Permission.storage].request();
-                  var status = await Permission.manageExternalStorage.status;
-                  var status1 = await Permission.storage.status;
-                  String? path = await NativeScreenshot.takeScreenshot();
-                  if (path != null) {
-                    await Share.shareXFiles([XFile(path)],
-                        text: 'Great picture');
-                    await File(path).delete();
-                  }
-                }),
-          ]
-          ));
-       // ),
-     // );
+              IconButton(
+                  icon: const Icon(Icons.save),
+                  onPressed: () async {
+                    saveScreen1();
+                  }),
+              IconButton(
+                  icon: const Icon(Icons.share),
+                  onPressed: () async {
+                    shareScreen(context);
+                  }),
+            ]));
+    // ),
+    // );
   }
 
   Widget buildBottomDrawer(BuildContext context) {
@@ -523,7 +451,11 @@ class _HelloWorldState extends State<HelloWorld> {
                 height: 20,
               ),
               Text("formula: ${widget.moleculeClass.formula}\n"),
-              Text("name: ${widget.moleculeClass.name}\n", maxLines: 1, overflow: TextOverflow.ellipsis,),
+              Text(
+                "name: ${widget.moleculeClass.name}\n",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               Text("type: ${widget.moleculeClass.type}\n"),
               Text("letter code: ${widget.moleculeClass.letterCode}\n"),
               //Text(mol.weight),

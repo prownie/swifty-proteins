@@ -89,6 +89,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    //TODO: fix async send an exception 
     setState(() async {
       _stateHistoryList.add(state);
       print(state);

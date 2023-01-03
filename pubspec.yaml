@@ -49,6 +49,7 @@ dependencies:
   native_screenshot: ^1.0.0
   share_plus: ^6.3.0
   share: ^2.0.4
+  fluttertoast: ^8.1.2 
 
 
 
