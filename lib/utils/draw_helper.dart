@@ -24,7 +24,6 @@ class DrawHelper {
       drawAtom(atom, moleculeDraw);
       for (var indexConnectedAtom in atom.connect) {
         if (atom.connect.where((e) => e == indexConnectedAtom).length > 1) {
-          print("more than one found");
           drawDoubleConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
         } else {
           drawConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
@@ -66,7 +65,7 @@ class DrawHelper {
     var firstBond =
         three.CylinderGeometry(0.05, 0.05, direction.length() / 2, 6, 4);
     firstBond.applyMatrix4(
-        new three.Matrix4().makeTranslation(0, direction.length() / 4, -0.06));
+        new three.Matrix4().makeTranslation(0, direction.length() / 4, -0.08));
     firstBond.applyMatrix4(
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
     var mesh = three.Mesh(firstBond,
@@ -78,7 +77,7 @@ class DrawHelper {
     var secondBond =
         three.CylinderGeometry(0.05, 0.05, direction.length() / 2, 6, 4);
     secondBond.applyMatrix4(
-        new three.Matrix4().makeTranslation(0, direction.length() / 4, 0.06));
+        new three.Matrix4().makeTranslation(0, direction.length() / 4, 0.08));
     secondBond.applyMatrix4(
         three.Matrix4().makeRotationX(three.MathUtils.degToRad(90)));
     mesh = three.Mesh(secondBond,

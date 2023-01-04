@@ -15,18 +15,11 @@ Molecule? detectDoubleBonds(Molecule) {
     // if not enough bonds, gotta add some
     while (bounds > Molecule.atomList[i].connect.length) {
       var newList = <int>[];
-      print("required bound: " + bounds.toString());
-      print("atom:");
-      print(Molecule.atomList[i]);
       for (int connectedIndex in Molecule.atomList[i].connect) {
         int? indexBounds =
             Constants.atomBonds[Molecule.atomList[connectedIndex].name];
-        print(Molecule.atomList[connectedIndex]);
-        print(indexBounds);
         if (indexBounds == null) continue;
-        print("skipped this");
         if (indexBounds != Molecule.atomList[connectedIndex].connect.length) {
-          print("found diff");
           newList = [...Molecule.atomList[i].connect];
           newList.add(connectedIndex);
           Molecule.atomList[connectedIndex].connect.add(i);
@@ -38,11 +31,11 @@ Molecule? detectDoubleBonds(Molecule) {
       else
         break;
     }
-    print(Molecule.atomList[i]);
-    print(" ||while1 bounds: " +
-        bounds.toString() +
-        ", actualLinks: " +
-        Molecule.atomList[i].connect.length.toString());
+    // print(Molecule.atomList[i]);
+    // print(" ||while1 bounds: " +
+    //     bounds.toString() +
+    //     ", actualLinks: " +
+    //     Molecule.atomList[i].connect.length.toString());
   }
 
   // now priorize carbons who dont have 2 carbons as neighbours, because less permitives
@@ -64,9 +57,6 @@ Molecule? detectDoubleBonds(Molecule) {
           }
         }
       }
-      // print("in while0");
-      print(avoid);
-      print(Molecule.atomList[i]);
       if (avoid) break;
       for (int connectedIndex in Molecule.atomList[i].connect) {
         int? indexBounds =
@@ -76,8 +66,6 @@ Molecule? detectDoubleBonds(Molecule) {
         if (indexBounds == null) continue;
         // print("skipped2 this");
         if (indexBounds != Molecule.atomList[connectedIndex].connect.length) {
-          print("found diff[" + i.toString() + "]");
-          print(Molecule.atomList[i]);
           newList = [...Molecule.atomList[i].connect];
           newList.add(connectedIndex);
           Molecule.atomList[connectedIndex].connect.add(i);
@@ -88,11 +76,6 @@ Molecule? detectDoubleBonds(Molecule) {
         Molecule.atomList[i].connect = newList;
       else
         break;
-    }
-
-    print("global state");
-    for (int i = 0; i < Molecule.atomList.length; i++) {
-      print(Molecule.atomList[i]);
     }
   }
 
@@ -105,7 +88,6 @@ Molecule? detectDoubleBonds(Molecule) {
     while (bounds > Molecule.atomList[i].connect.length) {
       var newList = <int>[];
       // print("in while0");
-      print(Molecule.atomList[i]);
 
       for (int connectedIndex in Molecule.atomList[i].connect) {
         int? indexBounds =
@@ -115,8 +97,6 @@ Molecule? detectDoubleBonds(Molecule) {
         if (indexBounds == null) continue;
         // print("skipped2 this");
         if (indexBounds != Molecule.atomList[connectedIndex].connect.length) {
-          print("found diff[" + i.toString() + "]");
-          print(Molecule.atomList[i]);
           newList = [...Molecule.atomList[i].connect];
           newList.add(connectedIndex);
           Molecule.atomList[connectedIndex].connect.add(i);
@@ -128,49 +108,7 @@ Molecule? detectDoubleBonds(Molecule) {
       else
         break;
     }
-
-    print("global state");
-    for (int i = 0; i < Molecule.atomList.length; i++) {
-      print(Molecule.atomList[i]);
-    }
   }
-
-  // // now add carbnos double bonds
-  // for (int i = 0; i < Molecule.atomList.length; i++) {
-  //   if (Molecule.atomList[i].name != 'C') continue;
-  //   int? bounds = Constants.atomBonds[Molecule.atomList[i].name];
-  //   if (bounds == null) continue; // not in bound dictionnary
-  //   // if not enough bonds, gotta add some
-  //   while (bounds > Molecule.atomList[i].connect.length) {
-  //     var newList = <int>[];
-  //     print("for carbon: required bound: " + bounds.toString());
-  //     print("atom:");
-  //     print(Molecule.atomList[i]);
-  //     for (int connectedIndex in Molecule.atomList[i].connect) {
-  //       int? indexBounds =
-  //           Constants.atomBonds[Molecule.atomList[connectedIndex].name];
-  //       print(Molecule.atomList[connectedIndex]);
-  //       print(indexBounds);
-  //       if (indexBounds == null) continue;
-  //       print("skipped3 this");
-  //       if (indexBounds != Molecule.atomList[connectedIndex].connect.length) {
-  //         print("found diff");
-  //         newList = [...Molecule.atomList[i].connect];
-  //         newList.add(connectedIndex);
-  //         Molecule.atomList[connectedIndex].connect.add(i);
-  //         break;
-  //       }
-  //     }
-  //     if (newList.length != 0)
-  //       Molecule.atomList[i].connect = newList;
-  //     else
-  //       break;
-  //   }
-  //   print("global state");
-  //   for (int i = 0; i < Molecule.atomList.length; i++) {
-  //     print(Molecule.atomList[i]);
-  //   }
-  // }
 
   return Molecule;
 }

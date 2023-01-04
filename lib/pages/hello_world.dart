@@ -14,7 +14,7 @@ import 'package:three_dart/three_dart.dart' as three;
 import 'package:bottom_drawer/bottom_drawer.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
-
+import '../utils/parse.dart';
 import '../model/atom.dart';
 import '../model/base_list.dart';
 import '../model/molecule.dart';
@@ -25,7 +25,7 @@ import '../style/style.dart' as s;
 
 class HelloWorld extends StatefulWidget {
   HelloWorld(this.moleculeClass);
-  final Molecule moleculeClass;
+  Molecule moleculeClass;
 
   @override
   State<HelloWorld> createState() => _HelloWorldState();
@@ -207,7 +207,7 @@ class _HelloWorldState extends State<HelloWorld> {
     pointerDown.y = details.globalPosition.dy - height / 2;
 
     pointer.x = (details.globalPosition.dx / width) * 2 - 1;
-    pointer.y = -((details.globalPosition.dy /*- 80*/) / height) * 2 + 1;
+    pointer.y = -(details.globalPosition.dy / height) * 2 + 1;
     var raycaster = three.Raycaster();
     raycaster.setFromCamera(pointer, camera);
 
@@ -227,6 +227,17 @@ class _HelloWorldState extends State<HelloWorld> {
         });
       }
     }
+  }
+
+  _resetMolecule(String newMoleculeName) async {
+    print(newMoleculeName);
+    scene.dispose();
+    disposed = true;
+    widget.moleculeClass =
+        await getMolecule(newMoleculeName) ?? widget.moleculeClass;
+    setState(() {});
+    disposed = false;
+    initScene();
   }
   // Future<String> saveImage(Uint8List bytes) async {
   //   await [Permission.storage].request();
@@ -272,7 +283,6 @@ class _HelloWorldState extends State<HelloWorld> {
                     targetCameraPosition -= (details.scale - _initialScale) * 4;
                   }
                   _initialScale = details.scale;
-                  print("details scale:" + details.scale.toString());
                 } else if (details.pointerCount == 1) {
                   _rotateMolecule(details);
                 }
@@ -283,11 +293,6 @@ class _HelloWorldState extends State<HelloWorld> {
               child: three3dRender.isInitialized
                   ? Texture(textureId: three3dRender.textureId!)
                   : Container(color: Colors.yellow),
-              // child: Listener(
-              //   onPointerMove: _rotateMolecule,
-              //   onPointerDown: _getLocations,
-
-              // ),
             );
           },
         )));
@@ -335,7 +340,7 @@ class _HelloWorldState extends State<HelloWorld> {
                               itemBuilder: (BuildContext context, int index) {
                                 return InkWell(
                                     onTap: () {
-                                      print(baselist[index]);
+                                      _resetMolecule(baselist[index]);
                                       //---------------------------------------//
                                       //
                                       //
