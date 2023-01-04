@@ -197,19 +197,17 @@ class _HelloWorldState extends State<HelloWorld> {
 
   _rotateMolecule(ScaleUpdateDetails details) async {
     targetRotationX -=
-        (_initalRotatePoint.dx - details.localFocalPoint.dx) * 0.0003;
+        (_initalRotatePoint.dx - details.localFocalPoint.dx) * 0.0006;
     targetRotationY -=
-        (_initalRotatePoint.dy - details.localFocalPoint.dy) * 0.0003;
+        (_initalRotatePoint.dy - details.localFocalPoint.dy) * 0.0006;
   }
 
-  _getLocations(PointerEvent details) async {
-    pointerDown.x = details.position.dx - width / 2;
-    pointerDown.y = details.position.dy - height / 2;
-    targetRotationOnPointerDownX = targetRotationX;
-    targetRotationOnPointerDownY = targetRotationY;
+  _getLocations(TapDownDetails details) async {
+    pointerDown.x = details.globalPosition.dx - width / 2;
+    pointerDown.y = details.globalPosition.dy - height / 2;
 
-    pointer.x = (details.position.dx / width) * 2 - 1;
-    pointer.y = -((details.position.dy /*- 80*/) / height) * 2 + 1;
+    pointer.x = (details.globalPosition.dx / width) * 2 - 1;
+    pointer.y = -((details.globalPosition.dy /*- 80*/) / height) * 2 + 1;
     var raycaster = three.Raycaster();
     raycaster.setFromCamera(pointer, camera);
 
@@ -229,10 +227,6 @@ class _HelloWorldState extends State<HelloWorld> {
         });
       }
     }
-  }
-
-  _zoomPanMolecule(details) {
-    if (details.pointerCount == 2) {}
   }
   // Future<String> saveImage(Uint8List bytes) async {
   //   await [Permission.storage].request();
@@ -272,16 +266,19 @@ class _HelloWorldState extends State<HelloWorld> {
                 if (details.pointerCount == 2) {
                   if (details.scale - _initialScale < 0) {
                     //moving away
-                    targetCameraPosition -= (details.scale - _initialScale) * 5;
+                    targetCameraPosition -= (details.scale - _initialScale) * 8;
                   } else {
                     // moving closer
-                    targetCameraPosition -= (details.scale - _initialScale) * 2;
+                    targetCameraPosition -= (details.scale - _initialScale) * 4;
                   }
                   _initialScale = details.scale;
                   print("details scale:" + details.scale.toString());
                 } else if (details.pointerCount == 1) {
                   _rotateMolecule(details);
                 }
+              },
+              onTapDown: (details) {
+                _getLocations(details);
               },
               child: three3dRender.isInitialized
                   ? Texture(textureId: three3dRender.textureId!)
