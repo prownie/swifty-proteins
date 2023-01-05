@@ -71,7 +71,6 @@ class _HelloWorldState extends State<HelloWorld> {
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
   late Uint8List _imageFile;
-  GlobalKey globalKey = GlobalKey();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
@@ -217,7 +216,7 @@ class _HelloWorldState extends State<HelloWorld> {
     for (var i = 0; i < intersects.length; i++) {
       if (intersects[i].object.geometry!.type == 'SphereGeometry') {
         if (atomLabel != null) {
-          molecule.remove(atomLabel!);
+          //molecule.remove(atomLabel!);
           atomLabel!.dispose();
           atomLabel = null;
         }
@@ -239,23 +238,6 @@ class _HelloWorldState extends State<HelloWorld> {
     disposed = false;
     initScene();
   }
-  // Future<String> saveImage(Uint8List bytes) async {
-  //   await [Permission.storage].request();
-  //   final result = await ImageGallerySaver.saveImage(bytes);
-  //   return result['filePath'];
-  // }
-
-  // Future<void> _capturePng() {
-  //   return Future.delayed(const Duration(milliseconds: 2000), () async {
-  //     RenderRepaintBoundary? boundary = globalKey.currentContext
-  //         ?.findRenderObject() as RenderRepaintBoundary?;
-  //     ui.Image image = await boundary!.toImage();
-  //     ByteData? byteData =
-  //         await image.toByteData(format: ui.ImageByteFormat.png);
-  //     Uint8List pngBytes = byteData!.buffer.asUint8List();
-  //     saveImage(pngBytes);
-  //   });
-  // }
 
   Widget _build(BuildContext context) {
     return Container(
@@ -300,9 +282,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-        key: globalKey,
-        child: Scaffold(
+    return Scaffold(
             drawer: Drawer(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -316,7 +296,7 @@ class _HelloWorldState extends State<HelloWorld> {
                     child: Container(
                         color: Colors.red,
                         height: 50,
-                        child: const Center(child: Text("return"))),
+                        child: const Center(child: Text("back to garage"))),
                   ),
                   TextField(
                     onSubmitted: (value) {
@@ -376,7 +356,7 @@ class _HelloWorldState extends State<HelloWorld> {
                   buildBottomDrawer(context)
                 ],
               );
-            })));
+            }));
   }
 
   Widget getAppBar(context) {
