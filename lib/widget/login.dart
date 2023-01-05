@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:swifty_proteins/pages/homepage.dart';
+import 'package:swifty_proteins/widget/popUp404.dart';
 
 class Initialize extends StatefulWidget {
   _InitializeState createState() => _InitializeState();
@@ -43,7 +44,12 @@ class _InitializeState extends State<Initialize> {
       }
     } on PlatformException catch (e) {
       print(e);
-      exit(1);
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) {
+            return errorLogin(context);
+          });
       // if (e.code == auth_error.lockedOut) {
       // return errorAuth(BuildContext);
       // }

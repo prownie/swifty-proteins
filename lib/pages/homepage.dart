@@ -12,11 +12,12 @@ import '../style/style.dart' as s;
 import '../utils/parse.dart';
 import '../widget/moleculeCard.dart';
 import '../widget/popUp404.dart';
+import '../utils/portal.dart';
 // import 'package:local_auth/error_codes.dart' as auth_error;
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
 
-Future<dynamic> _authenticate() async {
+Future<dynamic> _authenticate(context) async {
   final LocalAuthentication auth = LocalAuthentication();
   final List<BiometricType> availableBiometrics =
       await auth.getAvailableBiometrics();
@@ -37,11 +38,12 @@ Future<dynamic> _authenticate() async {
     }
   } on PlatformException catch (e) {
     print(e);
-    exit(1);
-    // if (e.code == auth_error.lockedOut) {
-    // return errorAuth(BuildContext);
-    // }
-    //exit(0);
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return errorLogin(context);
+        });
   }
 }
 
@@ -88,39 +90,43 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    //TODO: fix async send an exception 
-    setState(() async {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    //TODO: fix async send an exception
+    setState(() {
       _stateHistoryList.add(state);
       print(state);
-      if (_stateHistoryList[_stateHistoryList.length - 1] ==
-          AppLifecycleState.resumed) {
-        await _authenticate();
-      }
     });
+    if (_stateHistoryList[_stateHistoryList.length - 1] ==
+        AppLifecycleState.resumed) {
+      await _authenticate(context);
+    }
   }
 
   void loadMol(String str) {
     showDialog(
-      barrierDismissible: false,
+      barrierDismissible: true,
       context: context,
       builder: (BuildContext context) {
         return Dialog(
             backgroundColor: lightGrey,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+              side: const BorderSide(color: s.MyColor.portalGreen),
+              borderRadius: BorderRadius.circular(30),
             ),
             child: SizedBox(
-              height: 80,
-              child: Row(
+              height: 200,
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  CircularProgressIndicator(),
+                  PortalAnimator(),
                   SizedBox(
-                    width: 20,
+                    height: 5,
                   ),
-                  Text("Loading"),
+                  Text(
+                    "Enterring the portal...",
+                    style: TextStyle(color: s.MyColor.portalGreen),
+                  ),
                 ],
               ),
             ));
