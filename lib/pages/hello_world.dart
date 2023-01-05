@@ -19,6 +19,7 @@ import '../model/atom.dart';
 import '../model/base_list.dart';
 import '../model/molecule.dart';
 import '../utils/constants.dart';
+import '../utils/portal.dart';
 import '../utils/share_utils.dart';
 import '../widget/moleculeCard.dart';
 import '../style/style.dart' as s;
@@ -71,6 +72,7 @@ class _HelloWorldState extends State<HelloWorld> {
   //thomas
   BottomDrawerController bottomController = BottomDrawerController();
   late Uint8List _imageFile;
+  final _formKey = GlobalKey<FormState>();
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
@@ -228,7 +230,7 @@ class _HelloWorldState extends State<HelloWorld> {
     }
   }
 
-  _resetMolecule(String newMoleculeName) async {
+  Future<bool> _resetMolecule(String newMoleculeName) async {
     print(newMoleculeName);
     scene.dispose();
     disposed = true;
@@ -237,6 +239,8 @@ class _HelloWorldState extends State<HelloWorld> {
     setState(() {});
     disposed = false;
     initScene();
+    Navigator.pop(context);
+    return true;
   }
 
   Widget _build(BuildContext context) {
@@ -283,80 +287,216 @@ class _HelloWorldState extends State<HelloWorld> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  SizedBox(height: MediaQuery.of(context).padding.top),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context); // exit drawer
-                      Navigator.pop(context); // return to homepage
-                    },
-                    child: Container(
-                        color: Colors.red,
-                        height: 50,
-                        child: const Center(child: Text("back to garage"))),
-                  ),
-                  TextField(
-                    onSubmitted: (value) {
-                      //---------------------------------------//
-                      //
-                      //
-                      //    HERRRRRRRREEEEEEE utilise value
-                      //
-                      //
-                      //---------------------------------------//
-                    },
-                    decoration: const InputDecoration(
-                      hintText: "search another one",
-                    ),
-                  ),
-                  SizedBox(
-                      height: 400,
-                      width: 20,
-                      child: Scrollbar(
-                          child: ListView.separated(
-                              itemBuilder: (BuildContext context, int index) {
-                                return InkWell(
-                                    onTap: () {
-                                      _resetMolecule(baselist[index]);
-                                      //---------------------------------------//
-                                      //
-                                      //
-                                      //    HERRRRRRRREEEEEEE au bout mon petit
-                                      //
-                                      //
-                                      //---------------------------------------//
-                                    },
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // exit drawer
+                  Navigator.pop(context); // return to homepage
+                },
+                child: Container(
+                    color: Colors.red,
+                    height: 50,
+                    child: const Center(child: Text("back to garage"))),
+              ),
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                  }
+                  return baselist.where((String option) {
+                    return option.contains(textEditingValue.text.toUpperCase());
+                  });
+                },
+                fieldViewBuilder: (BuildContext context, inputController,
+                    FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                  return Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        validator: (value) {
+                          final validCharacters =
+                              RegExp(r'^[a-zA-Z0-9]+$'); // alphanum
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          } else if (!validCharacters
+                              .hasMatch(inputController.text)) {
+                            return "ligand code contain only alphanum character";
+                          } else if (inputController.text.length != 3) {
+                            return "ligand code contain exactly 3 character";
+                          }
+                          return null;
+                        },
+                        controller: inputController,
+                        decoration: const InputDecoration(
+                          hintText: "Type or select from list",
+                        ),
+                        focusNode: focusNode,
+                        onFieldSubmitted: (String value) {
+                          if (_formKey.currentState!.validate()) {
+                            onFieldSubmitted();
+                            Navigator.pop(context);
+                            showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                    backgroundColor: lightGrey,
+                                    shape: RoundedRectangleBorder(
+                                      side: const BorderSide(
+                                          color: s.MyColor.portalGreen),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
                                     child: SizedBox(
-                                      height: 30,
-                                      child:
-                                          Center(child: Text(baselist[index])),
+                                      height: 200,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          PortalAnimator(),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Text(
+                                            "Enterring the portal...",
+                                            style: TextStyle(
+                                                color: s.MyColor.portalGreen),
+                                          ),
+                                        ],
+                                      ),
                                     ));
                               },
-                              separatorBuilder: (context, index) =>
-                                  const Divider(),
-                              itemCount: baselist.length))),
-                ],
+                            );
+                            _resetMolecule(value.toUpperCase());
+                          }
+                        },
+                      ));
+                },
+                onSelected: (String selection) {
+                  Navigator.pop(context);
+                  showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                          backgroundColor: lightGrey,
+                          shape: RoundedRectangleBorder(
+                            side:
+                                const BorderSide(color: s.MyColor.portalGreen),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: SizedBox(
+                            height: 200,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                PortalAnimator(),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  "Enterring the portal...",
+                                  style:
+                                      TextStyle(color: s.MyColor.portalGreen),
+                                ),
+                              ],
+                            ),
+                          ));
+                    },
+                  );
+                  _resetMolecule(selection);
+                },
               ),
-            ),
-            body: Builder(builder: (BuildContext context) {
-              initSize(context);
-              return Stack(
-                children: [
-                  _build(context),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.07,
-                    left: 0,
-                    right: 0,
-                    //height: 80,
-                    child: getAppBar(context),
-                  ),
-                  buildBottomDrawer(context)
-                ],
-              );
-            }));
+              SizedBox(
+                  height: 400,
+                  width: 20,
+                  child: Scrollbar(
+                      child: ListView.separated(
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  showDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                          backgroundColor: lightGrey,
+                                          shape: RoundedRectangleBorder(
+                                            side: const BorderSide(
+                                                color: s.MyColor.portalGreen),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: SizedBox(
+                                            height: 200,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: const [
+                                                PortalAnimator(),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Text(
+                                                  "Enterring the portal...",
+                                                  style: TextStyle(
+                                                      color: s
+                                                          .MyColor.portalGreen),
+                                                ),
+                                              ],
+                                            ),
+                                          ));
+                                    },
+                                  );
+                                  _resetMolecule(baselist[index]);
+                                },
+                                child: SizedBox(
+                                  height: 30,
+                                  child: Center(child: Text(baselist[index])),
+                                ));
+                          },
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemCount: baselist.length))),
+            ],
+          ),
+        ),
+        body: Builder(builder: (BuildContext context) {
+          initSize(context);
+          return Stack(
+            children: [
+              _build(context),
+              Positioned(
+                top: MediaQuery.of(context).size.height * 0.07,
+                left: 0,
+                right: 0,
+                //height: 80,
+                child: getAppBar(context),
+              ),
+              labelMolecule != null
+                  ? Positioned(
+                      top: MediaQuery.of(context).size.height * 0.15,
+                      left: MediaQuery.of(context).size.width * 0.85,
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        width:  MediaQuery.of(context).size.height * 0.05,
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10)),
+                            border: Border.all(width: 4),
+                        ),
+                        child: Center(child: Text(labelMolecule!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      )))
+                  : SizedBox.shrink(),
+              buildBottomDrawer(context)
+            ],
+          );
+        }));
   }
 
   Widget getAppBar(context) {
@@ -404,22 +544,19 @@ class _HelloWorldState extends State<HelloWorld> {
           child: Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
+              children: const [
+                Icon(
                   Icons.arrow_drop_up,
                   color: Colors.black,
                 ),
-                const Text(
+                Text(
                   "Info",
                   style: TextStyle(color: Colors.black),
                 ),
-                const Icon(
+                Icon(
                   Icons.arrow_drop_up,
                   color: Colors.black,
                 ),
-                labelMolecule != null
-                    ? Text(labelMolecule!)
-                    : SizedBox.shrink(),
               ],
             ),
           )),

@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:swifty_proteins/utils/portal.dart';
 import '../model/atom.dart';
 import '../model/molecule.dart';
 import 'hello_world.dart';
@@ -12,12 +13,11 @@ import '../style/style.dart' as s;
 import '../utils/parse.dart';
 import '../widget/moleculeCard.dart';
 import '../widget/popUp404.dart';
-import '../utils/portal.dart';
 // import 'package:local_auth/error_codes.dart' as auth_error;
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
 
-Future<dynamic> _authenticate(context) async {
+Future<dynamic> _authenticate() async {
   final LocalAuthentication auth = LocalAuthentication();
   final List<BiometricType> availableBiometrics =
       await auth.getAvailableBiometrics();
@@ -38,12 +38,11 @@ Future<dynamic> _authenticate(context) async {
     }
   } on PlatformException catch (e) {
     print(e);
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return errorLogin(context);
-        });
+    exit(1);
+    // if (e.code == auth_error.lockedOut) {
+    // return errorAuth(BuildContext);
+    // }
+    //exit(0);
   }
 }
 
@@ -90,16 +89,15 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    //TODO: fix async send an exception
-    setState(() {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() async {
       _stateHistoryList.add(state);
       print(state);
+      if (_stateHistoryList[_stateHistoryList.length - 1] ==
+          AppLifecycleState.resumed) {
+        await _authenticate();
+      }
     });
-    if (_stateHistoryList[_stateHistoryList.length - 1] ==
-        AppLifecycleState.resumed) {
-      await _authenticate(context);
-    }
   }
 
   void loadMol(String str) {
@@ -153,25 +151,29 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   void loadMolSearch() {
     String str = inputController.text;
     showDialog(
-      barrierDismissible: false,
+      barrierDismissible: true,
       context: context,
       builder: (BuildContext context) {
         return Dialog(
             backgroundColor: lightGrey,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+              side: const BorderSide(color: s.MyColor.portalGreen),
+              borderRadius: BorderRadius.circular(30),
             ),
             child: SizedBox(
-              height: 80,
-              child: Row(
+              height: 200,
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  CircularProgressIndicator(),
+                  PortalAnimator(),
                   SizedBox(
-                    width: 20,
+                    height: 5,
                   ),
-                  Text("Loading"),
+                  Text(
+                    "Enterring the portal...",
+                    style: TextStyle(color: s.MyColor.portalGreen),
+                  ),
                 ],
               ),
             ));
@@ -209,7 +211,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
             child: Stack(
               children: <Widget>[
                 AnimatedPositioned(
-                  height: maxHeight * 0.08,
+                  height: maxHeight * 0.1,
                   top: (selected == 0) ? maxHeight * 0.25 : maxHeight * 0.03,
                   left: 10,
                   right: 10,
@@ -243,7 +245,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                           ? maxHeight * 0.78
                           : maxHeight * 0.08
                       : maxHeight * 0.08,
-                  top: (selected > 0) ? maxHeight * 0.1 : maxHeight * 0.37,
+                  top: (selected > 0) ? maxHeight * 0.12 : maxHeight * 0.37,
                   left: 10,
                   right: 10,
                   duration: const Duration(seconds: 1),
@@ -265,8 +267,8 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                   top: (selected == 0)
                       ? maxHeight * 0.47
                       : (selected == 1)
-                          ? maxHeight * 0.90
-                          : maxHeight * 0.2,
+                          ? maxHeight * 0.92
+                          : maxHeight * 0.22,
                   left: 10,
                   right: 10,
                   duration: const Duration(seconds: 1),
@@ -383,7 +385,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
                                           if (_formKey.currentState!
                                               .validate()) {
                                             onFieldSubmitted();
-                                            loadMol(value);
+                                            loadMol(value.toUpperCase());
                                           }
                                         },
                                       ));

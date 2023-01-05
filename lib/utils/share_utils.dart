@@ -50,14 +50,14 @@ Future<void> shareScreen(context) async {
           child: Container(
               //decoration: const BoxDecoration(
               //    borderRadius: BorderRadius.all(Radius.circular(500))),
-              height: maxHeight * 0.35,
+              height: maxHeight * 0.55,
               width: maxWidth * 0.85,
               padding: EdgeInsets.all(10),
               child: Column(
                 children: [
                   Container(
                     padding: EdgeInsets.all(10),
-                    height: maxHeight * 0.2,
+                    height: maxHeight * 0.3,
                     width: maxWidth * 0.8,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -99,7 +99,7 @@ Future<void> shareScreen(context) async {
                   ),
                   Container(
                     padding: EdgeInsets.all(10),
-                    height: maxHeight * 0.105,
+                    height: maxHeight * 0.2,
                     width: maxWidth * 0.8,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
