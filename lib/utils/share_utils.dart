@@ -1,3 +1,5 @@
+import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:native_screenshot/native_screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:native_screenshot/native_screenshot.dart';
 import 'package:http/http.dart';
@@ -11,11 +13,37 @@ import 'package:flutter/material.dart';
 import '../style/style.dart' as s;
 
 Future saveScreen1() async {
-  await [Permission.manageExternalStorage].request();
-  await [Permission.storage].request();
-  var status = await Permission.manageExternalStorage.status;
-  var status1 = await Permission.storage.status;
+  // await [Permission.manageExternalStorage].request();
+  // await [Permission.storage].request();
+  // var status = await Permission.manageExternalStorage.status;
+  // var status1 = await Permission.storage.status;
+
+
+
+// await [Permission.manageExternalStorage].request();
+  // var storage = await [Permission.storage].request();
+  // var ret = await [Permission.photos].request();
+  // //var status = await Permission.manageExternalStorage.status;
+  // //var status1 = await Permission.storage.status;
+  // print("here isisisisisisisisiis   $ret      \n $storage");
+
+
+
+  final androidInfo = await DeviceInfoPlugin().androidInfo;
+  late final Map<Permission, PermissionStatus> statusess;
+
+  if (androidInfo.version.sdkInt <= 32) {
+    statusess = await [
+      Permission.storage,
+    ].request();
+  } else {
+    statusess = await [Permission.photos, Permission.notification].request();
+  }
+  
+
+
   String? path = await NativeScreenshot.takeScreenshot();
+  print("here is path       $path");
   //show toast to notify screen succesfully
   Fluttertoast.showToast(
       msg: "Morty took a screenshot",
@@ -28,10 +56,13 @@ Future saveScreen1() async {
 }
 
 Future<void> shareScreen(context) async {
-  await [Permission.manageExternalStorage].request();
-  await [Permission.storage].request();
-  var status = await Permission.manageExternalStorage.status;
-  var status1 = await Permission.storage.status;
+  // await [Permission.manageExternalStorage].request();
+  var storage = await [Permission.storage].request();
+  var ret = await [Permission.photos].request();
+  //var status = await Permission.manageExternalStorage.status;
+  //var status1 = await Permission.storage.status;
+  print("here isisisisisisisisiis   $ret      \n $storage");
+
   String? path = await NativeScreenshot.takeScreenshot();
 
   double maxWidth = MediaQuery.of(context).size.width;
@@ -82,7 +113,8 @@ Future<void> shareScreen(context) async {
                         ),
                         onPressed: () async {
                           if (path != null) {
-                            await Share.shareXFiles([XFile(path)],text: controller.text);
+                            await Share.shareXFiles([XFile(path)],
+                                text: controller.text);
                             await File(path).delete();
                           }
                           Navigator.pop(context);
