@@ -17,11 +17,11 @@ class DrawHelper {
   late three.Mesh atomToDraw;
   late List<Atom> atomList;
 
-  drawMolecule(List<Atom> list, three.Group moleculeDraw) {
+  drawMolecule(List<Atom> list, three.Group moleculeDraw, bool fatMol) {
     atomList = list;
 
     for (var atom in atomList) {
-      drawAtom(atom, moleculeDraw);
+      drawAtom(atom, moleculeDraw, fatMol);
       for (var indexConnectedAtom in atom.connect) {
         if (atom.connect.where((e) => e == indexConnectedAtom).length > 1) {
           drawDoubleConnect(atom, atomList[indexConnectedAtom], moleculeDraw);
@@ -33,8 +33,9 @@ class DrawHelper {
     }
   }
 
-  drawAtom(Atom atom, three.Group moleculeDraw) {
-    sphere = three.SphereGeometry(0.3);
+  drawAtom(Atom atom, three.Group moleculeDraw, bool fatMol) {
+    double size = fatMol ? 1 : 0.3;
+    sphere = three.SphereGeometry(size);
     texture =
         three.MeshLambertMaterial({"color": Constants.atomsCPK[atom.name]});
     atomToDraw = three.Mesh(sphere, texture);

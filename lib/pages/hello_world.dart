@@ -55,6 +55,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   late bool loaded = false;
   late bool disposed = false;
+  late bool fatMol = false;
   String? labelMolecule;
   dynamic sourceTexture;
   dynamic mesh;
@@ -148,13 +149,15 @@ class _HelloWorldState extends State<HelloWorld> {
     light.castShadow = true;
     light.shadow!.camera!.zoom = 1; // tighter shadow map
     scene.add(light);
-    DrawHelper().drawMolecule(widget.moleculeClass.atomList, molecule);
+    DrawHelper().drawMolecule(widget.moleculeClass.atomList, molecule, fatMol);
     scene.add(molecule);
 
     camera.lookAt(scene.position);
     camera.position.z = 10;
     // mesh.rotation.x = 5;
     loaded = true;
+    targetRotationX = molecule.rotation.y;
+    targetRotationY = molecule.rotation.x;
     animate();
   }
 
@@ -223,23 +226,30 @@ class _HelloWorldState extends State<HelloWorld> {
           atomLabel = null;
         }
         setState(() {
+          print("in setState moleculeLabel");
           labelMolecule = getAtomNameFromColor(
               intersects[i].object.material.color.getHex());
+          print(labelMolecule);
         });
+        break;
       }
     }
   }
 
   Future<bool> _resetMolecule(String newMoleculeName) async {
-    print(newMoleculeName);
     scene.dispose();
     disposed = true;
-    widget.moleculeClass =
-        await getMolecule(newMoleculeName) ?? widget.moleculeClass;
+    if (newMoleculeName != '')
+      widget.moleculeClass =
+          await getMolecule(newMoleculeName) ?? widget.moleculeClass;
+    else {
+      fatMol = !fatMol;
+      await Future.delayed(Duration(milliseconds: 300));
+    }
     setState(() {});
     disposed = false;
     initScene();
-    Navigator.pop(context);
+    if (newMoleculeName != '') Navigator.pop(context);
     return true;
   }
 
@@ -480,18 +490,56 @@ class _HelloWorldState extends State<HelloWorld> {
               ),
               labelMolecule != null
                   ? Positioned(
-                      top: MediaQuery.of(context).size.height * 0.15,
-                      left: MediaQuery.of(context).size.width * 0.85,
+                      top: MediaQuery.of(context).size.height * 0.17,
+                      left: MediaQuery.of(context).size.width * 0.02,
                       child: Container(
                         height: MediaQuery.of(context).size.height * 0.05,
-                        width:  MediaQuery.of(context).size.height * 0.05,
+                        width: MediaQuery.of(context).size.width * 0.96,
                         decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10)),
-                            border: Border.all(width: 4),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(50)),
+                          border: Border.all(
+                            width: 4,
+                            color: s.MyColor.rickBlue,
+                          ),
+                          color: s.MyColor.rickBlue,
                         ),
-                        child: Center(child: Text(labelMolecule!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                      )))
+                        child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                labelMolecule = null;
+                              });
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Icon(Icons.info_outline,
+                                    color: Color(Constants
+                                        .atomsToColor[labelMolecule!]!)),
+                                Stack(children: [
+                                  Text(Constants.atomsFullName[labelMolecule!]!,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        foreground: Paint()
+                                          ..style = PaintingStyle.stroke
+                                          ..strokeWidth = 3
+                                          ..color = Colors.black,
+                                      )),
+                                  Text(Constants.atomsFullName[labelMolecule!]!,
+                                      style: TextStyle(
+                                        color: Color(Constants
+                                            .atomsToColor[labelMolecule!]!),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ))
+                                ]),
+                                Icon(Icons.close,
+                                    color: Color(Constants
+                                        .atomsToColor[labelMolecule!]!)),
+                              ],
+                            )),
+                      ))
                   : SizedBox.shrink(),
               buildBottomDrawer(context)
             ],
@@ -517,10 +565,7 @@ class _HelloWorldState extends State<HelloWorld> {
                   Icons.remove_red_eye,
                   //color: Color.fromARGB(255, 213, 207, 192),
                 ),
-                onPressed: () => showDialog(
-                    context: context,
-                    builder: (context) =>
-                        buildCard(context, widget.moleculeClass)),
+                onPressed: () => _resetMolecule(''),
               ),
               IconButton(
                   icon: const Icon(Icons.save),
