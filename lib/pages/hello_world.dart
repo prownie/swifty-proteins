@@ -491,18 +491,23 @@ class _HelloWorldState extends State<HelloWorld> {
               labelMolecule != null
                   ? Positioned(
                       top: MediaQuery.of(context).size.height * 0.17,
-                      left: MediaQuery.of(context).size.width * 0.02,
+                      left: MediaQuery.of(context).size.width * 0.33,
                       child: Container(
+                        padding: const EdgeInsets.only(left: 5),
                         height: MediaQuery.of(context).size.height * 0.05,
-                        width: MediaQuery.of(context).size.width * 0.96,
+                        //width: MediaQuery.of(context).size.width * 0.33,
                         decoration: BoxDecoration(
                           borderRadius:
                               const BorderRadius.all(Radius.circular(50)),
-                          border: Border.all(
-                            width: 4,
-                            color: s.MyColor.rickBlue,
-                          ),
-                          color: s.MyColor.rickBlue,
+                          color: Color.fromARGB(83, 145, 145, 145),//s.MyColor.rickBlue,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset: Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
                         ),
                         child: GestureDetector(
                             onTap: () {
@@ -511,27 +516,22 @@ class _HelloWorldState extends State<HelloWorld> {
                               });
                             },
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.info_outline,
-                                    color: Color(Constants
-                                        .atomsToColor[labelMolecule!]!)),
                                 Stack(children: [
                                   Text(Constants.atomsFullName[labelMolecule!]!,
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
+                                        fontSize: 18,
                                         foreground: Paint()
                                           ..style = PaintingStyle.stroke
-                                          ..strokeWidth = 3
+                                          ..strokeWidth = 1
                                           ..color = Colors.black,
                                       )),
                                   Text(Constants.atomsFullName[labelMolecule!]!,
                                       style: TextStyle(
                                         color: Color(Constants
                                             .atomsToColor[labelMolecule!]!),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
+                                        fontSize: 18,
                                       ))
                                 ]),
                                 Icon(Icons.close,
