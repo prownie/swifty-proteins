@@ -4,15 +4,9 @@
 
 <h2>Project Screenshots:</h2>
 
-<!-- <img src="[url=https://postimg.cc/crpbDscK][img]https://i.postimg.cc/crpbDscK/Screenshot-2023-01-09-at-13-02-55.png[/img][/url]" alt="project-screenshot" width="400" height="400/">
+<img src="![Screenshot 2023-01-09 at 13 02 55](https://user-images.githubusercontent.com/53308638/211306569-f35a1ab3-e70b-4676-b161-6f0430156c2a.png)" alt="project-screenshot" width="400" height="400/">
 
-<img src="[url=https://postimg.cc/1gH75D16][img]https://i.postimg.cc/1gH75D16/Screenshot-2023-01-09-at-13-03-56.png[/img][/url]" alt="project-screenshot" width="400" height="400/"> -->
-
-![Screenshot 2023-01-09 at 13 02 55](https://user-images.githubusercontent.com/53308638/211306569-f35a1ab3-e70b-4676-b161-6f0430156c2a.png)
-
-![Screenshot 2023-01-09 at 13 03 56](https://user-images.githubusercontent.com/53308638/211306551-c8914fdf-4483-4215-a545-8ed8b8ed077f.png)
-
-  
+<img src="![Screenshot 2023-01-09 at 13 03 56](https://user-images.githubusercontent.com/53308638/211306551-c8914fdf-4483-4215-a545-8ed8b8ed077f.png)" alt="project-screenshot" width="400" height="400/">
   
 <h2>🧐 Features</h2>
 
