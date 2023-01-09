@@ -4,7 +4,7 @@
 
 <h2>Project Screenshots:</h2>
 
-![Screenshot 2023-01-09 at 13 02 55](https://user-images.githubusercontent.com/53308638/211306569-f35a1ab3-e70b-4676-b161-6f0430156c2a.png)| width=150 ![Screenshot 2023-01-09 at 13 03 56](https://user-images.githubusercontent.com/53308638/211306551-c8914fdf-4483-4215-a545-8ed8b8ed077f.png)| width=150
+![Screenshot 2023-01-09 at 13 02 55](https://user-images.githubusercontent.com/53308638/211306569-f35a1ab3-e70b-4676-b161-6f0430156c2a.png) ![Screenshot 2023-01-09 at 13 03 56](https://user-images.githubusercontent.com/53308638/211306551-c8914fdf-4483-4215-a545-8ed8b8ed077f.png)
   
 <h2>🧐 Features</h2>
 
