@@ -7,10 +7,14 @@ import 'package:swifty_proteins/pages/homepage.dart';
 import 'package:swifty_proteins/widget/popUp404.dart';
 
 class Initialize extends StatefulWidget {
+  const Initialize({super.key});
+
+  @override
   _InitializeState createState() => _InitializeState();
 }
 
 class _InitializeState extends State<Initialize> {
+  @override
   void initState() {
     super.initState();
     _initialize();
@@ -23,6 +27,7 @@ class _InitializeState extends State<Initialize> {
     final bool isBiometricsAvailable = await auth.isDeviceSupported();
     print(isBiometricsAvailable);
     if (!isBiometricsAvailable || availableBiometrics.isEmpty) {
+      // ignore: use_build_context_synchronously
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => const Homepage()));
       return;
@@ -37,10 +42,16 @@ class _InitializeState extends State<Initialize> {
           biometricOnly: true,
         ),
       );
+      // ignore: use_build_context_synchronously
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => const Homepage()));
       if (ret == false) {
-        exit(1);
+       showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) {
+            return errorLogin(context);
+          });
       }
     } on PlatformException catch (e) {
       print(e);

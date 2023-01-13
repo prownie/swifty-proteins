@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +16,7 @@ import '../widget/popUp404.dart';
 
 var lightGrey = Color.fromARGB(210, 128, 128, 128);
 
-Future<dynamic> _authenticate() async {
+Future<dynamic> _authenticate(context) async {
   final LocalAuthentication auth = LocalAuthentication();
   final List<BiometricType> availableBiometrics =
       await auth.getAvailableBiometrics();
@@ -26,19 +25,30 @@ Future<dynamic> _authenticate() async {
 
   try {
     var ret = await auth.authenticate(
-      localizedReason: 'Scan Fingerprint To Enter',
+      localizedReason: 'Rick needs your fingerprint for his database',
       options: const AuthenticationOptions(
         useErrorDialogs: true,
         stickyAuth: true,
         biometricOnly: true,
       ),
     );
+    print(ret);
     if (ret == false) {
-      exit(1);
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) {
+            return errorLogin(context);
+          });
     }
   } on PlatformException catch (e) {
     print(e);
-    exit(1);
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return errorLogin(context);
+        });
     // if (e.code == auth_error.lockedOut) {
     // return errorAuth(BuildContext);
     // }
@@ -67,6 +77,8 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   // 2 = list
   int selected = 0;
 
+  bool tt = false;
+
   @override
   void initState() {
     inputController.text = "";
@@ -92,17 +104,23 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() async {
       _stateHistoryList.add(state);
-      print(state);
       if (_stateHistoryList[_stateHistoryList.length - 1] ==
-          AppLifecycleState.resumed) {
-        await _authenticate();
+          AppLifecycleState.paused) {
+        tt = false;
+      }
+      if (_stateHistoryList[_stateHistoryList.length - 1] ==
+              AppLifecycleState.resumed &&
+          tt == false && _stateHistoryList.length > 2) {
+        print(_stateHistoryList[_stateHistoryList.length - 1]);
+        await _authenticate(context);
+        tt = true;
       }
     });
   }
 
   void loadMol(String str) {
     showDialog(
-      barrierDismissible: true,
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return Dialog(
@@ -211,7 +229,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
             child: Stack(
               children: <Widget>[
                 AnimatedPositioned(
-                  height: maxHeight * 0.1,
+                  height: maxHeight * 0.12,
                   top: (selected == 0) ? maxHeight * 0.25 : maxHeight * 0.03,
                   left: 10,
                   right: 10,

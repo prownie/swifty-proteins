@@ -78,7 +78,7 @@ class _HelloWorldState extends State<HelloWorld> {
   Future<void> initPlatformState() async {
     width = screenSize!.width;
     height = screenSize!.height;
-   // -76; // safe area
+    // -76; // safe area
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -197,6 +197,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   dispose() {
     disposed = true;
+    three3dRender.dispose();
     super.dispose();
   }
 
@@ -424,7 +425,8 @@ class _HelloWorldState extends State<HelloWorld> {
                 },
               ),
               SizedBox(
-                  height: screenHeight! - 100 - MediaQuery.of(context).padding.top,
+                  height:
+                      screenHeight! - 100 - MediaQuery.of(context).padding.top,
                   width: 20,
                   child: Scrollbar(
                       child: ListView.separated(
