@@ -77,7 +77,8 @@ class _HelloWorldState extends State<HelloWorld> {
 
   Future<void> initPlatformState() async {
     width = screenSize!.width;
-    height = screenSize!.height; // - 76; // safe area
+    height = screenSize!.height;
+   // -76; // safe area
 
     camera = three.PerspectiveCamera(60, width / height, 0.1, 1000);
     three3dRender = FlutterGlPlugin();
@@ -100,9 +101,9 @@ class _HelloWorldState extends State<HelloWorld> {
   }
 
   initSize(BuildContext context) {
-    if (screenSize != null) {
-      return;
-    }
+    // if (screenSize != null) {
+    //   return;
+    // }
 
     final mqd = MediaQuery.of(context);
     screenSize = mqd.size;
@@ -296,6 +297,7 @@ class _HelloWorldState extends State<HelloWorld> {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         drawer: Drawer(
           child: ListView(
@@ -422,7 +424,7 @@ class _HelloWorldState extends State<HelloWorld> {
                 },
               ),
               SizedBox(
-                  height: 400,
+                  height: screenHeight! - 100 - MediaQuery.of(context).padding.top,
                   width: 20,
                   child: Scrollbar(
                       child: ListView.separated(
@@ -491,7 +493,7 @@ class _HelloWorldState extends State<HelloWorld> {
               labelMolecule != null
                   ? Positioned(
                       top: MediaQuery.of(context).size.height * 0.17,
-                      left: MediaQuery.of(context).size.width * 0.33,
+                      left: MediaQuery.of(context).size.width * 0.36,
                       child: Container(
                         padding: const EdgeInsets.only(left: 5),
                         height: MediaQuery.of(context).size.height * 0.05,
@@ -499,13 +501,15 @@ class _HelloWorldState extends State<HelloWorld> {
                         decoration: BoxDecoration(
                           borderRadius:
                               const BorderRadius.all(Radius.circular(50)),
-                          color: Color.fromARGB(83, 145, 145, 145),//s.MyColor.rickBlue,
+                          color: Color.fromARGB(
+                              83, 145, 145, 145), //s.MyColor.rickBlue,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 5,
                               blurRadius: 7,
-                              offset: Offset(0, 3), // changes position of shadow
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
                             ),
                           ],
                         ),
@@ -525,18 +529,40 @@ class _HelloWorldState extends State<HelloWorld> {
                                         foreground: Paint()
                                           ..style = PaintingStyle.stroke
                                           ..strokeWidth = 1
-                                          ..color = Colors.black,
+                                          ..color = Constants.atomsFullName[
+                                                      labelMolecule!] ==
+                                                  "Hydrogen"
+                                              ? Colors.grey
+                                              : Color(Constants.atomsToColor[
+                                                  labelMolecule!]!), //Colors.black,
                                       )),
                                   Text(Constants.atomsFullName[labelMolecule!]!,
-                                      style: TextStyle(
-                                        color: Color(Constants
-                                            .atomsToColor[labelMolecule!]!),
+                                      style: const TextStyle(
+                                        color: Colors.white, //Color(Constants
+                                        // .atomsToColor[labelMolecule!]!),
                                         fontSize: 18,
                                       ))
                                 ]),
-                                Icon(Icons.close,
-                                    color: Color(Constants
-                                        .atomsToColor[labelMolecule!]!)),
+                                Container(
+                                    width: 16,
+                                    height: 16,
+                                    alignment: Alignment.center,
+                                    margin: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                        color: Constants.atomsFullName[
+                                                    labelMolecule!] ==
+                                                "Hydrogen"
+                                            ? Colors.grey
+                                            : Color(Constants
+                                                .atomsToColor[labelMolecule!]!),
+                                        borderRadius:
+                                            BorderRadius.circular(100)),
+                                    child: const Center(
+                                        child: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ))),
                               ],
                             )),
                       ))

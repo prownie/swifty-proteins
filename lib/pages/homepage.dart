@@ -7,7 +7,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:swifty_proteins/utils/portal.dart';
 import '../model/atom.dart';
 import '../model/molecule.dart';
-import 'hello_world.dart';
+import 'scene.dart';
 import '../model/base_list.dart';
 import '../style/style.dart' as s;
 import '../utils/parse.dart';
