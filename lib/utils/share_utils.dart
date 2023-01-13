@@ -43,8 +43,6 @@ Future saveScreen1() async {
 
 
   String? path = await NativeScreenshot.takeScreenshot();
-  print("here is path       $path");
-  //show toast to notify screen succesfully
   Fluttertoast.showToast(
       msg: "Morty took a screenshot",
       toastLength: Toast.LENGTH_SHORT,
@@ -56,11 +54,8 @@ Future saveScreen1() async {
 }
 
 Future<void> shareScreen(context) async {
-  // await [Permission.manageExternalStorage].request();
   var storage = await [Permission.storage].request();
   var ret = await [Permission.photos].request();
-  //var status = await Permission.manageExternalStorage.status;
-  //var status1 = await Permission.storage.status;
   print("here isisisisisisisisiis   $ret      \n $storage");
 
   String? path = await NativeScreenshot.takeScreenshot();
@@ -77,10 +72,7 @@ Future<void> shareScreen(context) async {
             side: const BorderSide(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(20),
           ),
-          //title: const Text("Error",style: TextStyle(color:Colors.red),),
           child: Container(
-              //decoration: const BoxDecoration(
-              //    borderRadius: BorderRadius.all(Radius.circular(500))),
               height: maxHeight * 0.55,
               width: maxWidth * 0.85,
               padding: EdgeInsets.all(10),
@@ -129,6 +121,8 @@ Future<void> shareScreen(context) async {
                   const SizedBox(
                     height: 10,
                   ),
+
+                  MediaQuery.of(context).viewInsets.bottom > 100 ? const SizedBox() :
                   Container(
                     padding: EdgeInsets.all(10),
                     height: maxHeight * 0.2,
@@ -164,12 +158,4 @@ Future<void> shareScreen(context) async {
               )),
         );
       });
-
-  //dialog ask for message
-
-  //if (path != null) {
-  //  await Share.shareXFiles([XFile(path)], text: 'Great picture');
-  //  await File(path).delete();
-  //}
-  //show toast to notify screen succesfully
 }

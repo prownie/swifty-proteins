@@ -503,7 +503,7 @@ class _HelloWorldState extends State<HelloWorld> {
                         decoration: BoxDecoration(
                           borderRadius:
                               const BorderRadius.all(Radius.circular(50)),
-                          color: Color.fromARGB(
+                          color: const Color.fromARGB(
                               83, 145, 145, 145), //s.MyColor.rickBlue,
                           boxShadow: [
                             BoxShadow(
