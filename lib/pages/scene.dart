@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import '../widget/popUp404.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_gl/flutter_gl.dart';
@@ -101,11 +103,20 @@ class _HelloWorldState extends State<HelloWorld> {
   }
 
   initSize(BuildContext context) {
-    // if (screenSize != null) {
-    //   return;
-    // }
-
+    print("initsizecalled");
     final mqd = MediaQuery.of(context);
+
+    if (screenSize != null) {
+      //already init, but orientation changed
+      if (mqd.size != screenSize) {
+        print("dpr changed");
+        screenSize = mqd.size;
+        dpr = mqd.devicePixelRatio;
+        _resetMolecule('', false);
+      }
+      return;
+    }
+
     screenSize = mqd.size;
     dpr = mqd.devicePixelRatio;
     if (renderer == null) initPlatformState();
@@ -197,8 +208,12 @@ class _HelloWorldState extends State<HelloWorld> {
 
   dispose() {
     disposed = true;
-    three3dRender.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    print("metrics changed");
   }
 
   _rotateMolecule(ScaleUpdateDetails details) async {
@@ -238,28 +253,44 @@ class _HelloWorldState extends State<HelloWorld> {
     }
   }
 
-  Future<bool> _resetMolecule(String newMoleculeName) async {
+  Future<bool> _resetMolecule(String newMoleculeName, bool switchModel) async {
+    dynamic molFound;
     scene.dispose();
     disposed = true;
+    three3dRender.dispose();
+    initPlatformState();
     if (newMoleculeName != '')
-      widget.moleculeClass =
-          await getMolecule(newMoleculeName) ?? widget.moleculeClass;
+      molFound = await getMolecule(newMoleculeName, context);
     else {
-      fatMol = !fatMol;
+      if (switchModel) fatMol = !fatMol;
       await Future.delayed(Duration(milliseconds: 300));
     }
-    setState(() {});
-    disposed = false;
-    initScene();
-    if (newMoleculeName != '') Navigator.pop(context);
-    return true;
+    if (molFound == null) {
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) {
+            return error404(context);
+          });
+      Navigator.of(context).pop();
+      disposed = false;
+      animate();
+      return false;
+    } else {
+      widget.moleculeClass = molFound;
+      setState(() {});
+      disposed = false;
+      initScene();
+      if (newMoleculeName != '') Navigator.pop(context);
+      return true;
+    }
   }
 
   Widget _build(BuildContext context) {
     return Container(
         width: width,
         height: height,
-        color: Colors.blue,
+        color: Colors.black,
         child: Container(child: Builder(
           builder: (BuildContext context) {
             return GestureDetector(
@@ -290,7 +321,7 @@ class _HelloWorldState extends State<HelloWorld> {
               },
               child: three3dRender.isInitialized
                   ? Texture(textureId: three3dRender.textureId!)
-                  : Container(color: Colors.yellow),
+                  : SizedBox.shrink(),
             );
           },
         )));
@@ -383,7 +414,7 @@ class _HelloWorldState extends State<HelloWorld> {
                                     ));
                               },
                             );
-                            _resetMolecule(value.toUpperCase());
+                            _resetMolecule(value.toUpperCase(), false);
                           }
                         },
                       ));
@@ -421,7 +452,7 @@ class _HelloWorldState extends State<HelloWorld> {
                           ));
                     },
                   );
-                  _resetMolecule(selection);
+                  _resetMolecule(selection, false);
                 },
               ),
               SizedBox(
@@ -468,7 +499,7 @@ class _HelloWorldState extends State<HelloWorld> {
                                           ));
                                     },
                                   );
-                                  _resetMolecule(baselist[index]);
+                                  _resetMolecule(baselist[index], false);
                                 },
                                 child: SizedBox(
                                   height: 30,
@@ -503,7 +534,7 @@ class _HelloWorldState extends State<HelloWorld> {
                         decoration: BoxDecoration(
                           borderRadius:
                               const BorderRadius.all(Radius.circular(50)),
-                          color: const Color.fromARGB(
+                          color: Color.fromARGB(
                               83, 145, 145, 145), //s.MyColor.rickBlue,
                           boxShadow: [
                             BoxShadow(
@@ -593,7 +624,7 @@ class _HelloWorldState extends State<HelloWorld> {
                   Icons.remove_red_eye,
                   //color: Color.fromARGB(255, 213, 207, 192),
                 ),
-                onPressed: () => _resetMolecule(''),
+                onPressed: () => _resetMolecule('', true),
               ),
               IconButton(
                   icon: const Icon(Icons.save),

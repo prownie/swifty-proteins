@@ -1,12 +1,12 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:swifty_proteins/utils/constants.dart';
 import 'package:http/http.dart' as http;
 import '../model/atom.dart';
 import '../model/molecule.dart';
+import '../widget/popUp404.dart';
 
 Molecule? detectDoubleBonds(Molecule) {
-  print("start");
-
   //place other than carbons first, because they are the more flexible due to their numbers
   for (int i = 0; i < Molecule.atomList.length; i++) {
     if (Molecule.atomList[i].name == 'C') continue;
@@ -113,7 +113,7 @@ Molecule? detectDoubleBonds(Molecule) {
   return Molecule;
 }
 
-Future<Molecule?> getMolecule(String code) async {
+Future<Molecule?> getMolecule(String code, context) async {
   Molecule ret = Molecule('', '', 0, '', '');
   await initMol(code).then((value) {
     if (value != null) {
@@ -121,7 +121,13 @@ Future<Molecule?> getMolecule(String code) async {
     }
   });
   if (ret.name == '') {
-    print("empty donc 404");
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return error404(context);
+        });
+
     return null;
   }
   await getAtomList(code).then((value) {

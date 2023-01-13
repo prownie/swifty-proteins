@@ -110,7 +110,8 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
       }
       if (_stateHistoryList[_stateHistoryList.length - 1] ==
               AppLifecycleState.resumed &&
-          tt == false && _stateHistoryList.length > 2) {
+          tt == false &&
+          _stateHistoryList.length > 2) {
         print(_stateHistoryList[_stateHistoryList.length - 1]);
         await _authenticate(context);
         tt = true;
@@ -148,7 +149,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
             ));
       },
     );
-    getMolecule(str).then((value) {
+    getMolecule(str, context).then((value) {
       Navigator.pop(context);
       if (value == null) {
         showDialog(
@@ -197,7 +198,7 @@ class _Homepage extends State<Homepage> with WidgetsBindingObserver {
             ));
       },
     );
-    getMolecule(str).then((value) {
+    getMolecule(str, context).then((value) {
       Navigator.pop(context);
       if (value == null) {
         print("go pop up ");
